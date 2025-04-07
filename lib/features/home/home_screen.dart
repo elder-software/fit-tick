@@ -1,9 +1,11 @@
 import 'package:fit_tick_mobile/ui/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fit_tick_mobile/ui/dialog.dart';
+import 'package:fit_tick_mobile/features/home/home_bloc.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final HomeBloc homeBloc;
+  const HomeScreen({super.key, required this.homeBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +70,7 @@ class HomeScreen extends StatelessWidget {
           onSave: () {
             String workoutName = controller.text;
             if (workoutName.isNotEmpty) {
-              print('Workout Name Entered: $workoutName');
-              Navigator.of(dialogContext).pop();
+              homeBloc.add(CreateWorkout(name: workoutName));
             } else {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 const SnackBar(content: Text('Workout name cannot be empty')),

@@ -5,6 +5,7 @@ import 'package:fit_tick_mobile/core/firebase_options.dart';
 import 'package:fit_tick_mobile/features/home/home_screen.dart';
 import 'package:fit_tick_mobile/features/workout/workout_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'util.dart';
 import 'theme.dart';
 
@@ -33,10 +34,15 @@ class FitTickApp extends StatelessWidget {
         TextTheme textTheme = createTextTheme(context, "Roboto", "Montserrat");
         MaterialTheme theme = MaterialTheme(textTheme);
 
+        final homeBloc = ref.watch(homeBlocProvider);
+
         return MaterialApp(
           title: 'FitTick',
           theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-          home: const HomeScreen(),
+          home: BlocProvider.value(
+            value: homeBloc,
+            child: HomeScreen(homeBloc: homeBloc),
+          ),
           routes: {'/workout': (context) => const WorkoutScreen()},
         );
       },
