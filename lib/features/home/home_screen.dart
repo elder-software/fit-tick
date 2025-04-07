@@ -1,4 +1,6 @@
+import 'package:fit_tick_mobile/ui/textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:fit_tick_mobile/ui/dialog.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -29,10 +31,7 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Text(
-            'Workouts',
-            style: theme.textTheme.headlineSmall,
-          ),
+          Text('Workouts', style: theme.textTheme.headlineSmall),
           const Divider(height: 32.0),
           // TODO: Add Workout List Items here
           _buildWorkoutCard(
@@ -47,11 +46,50 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Implement add workout action
+          _showAddWorkoutDialog(context);
         },
         backgroundColor: colorScheme.tertiaryContainer,
         foregroundColor: colorScheme.onTertiaryContainer,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Future<void> _showAddWorkoutDialog(BuildContext context) async {
+    final TextEditingController controller = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StandardDialog(
+          title: 'Workout Name',
+          content: _buildAddWorkoutDialogContent(controller, dialogContext),
+          onSave: () {
+            String workoutName = controller.text;
+            if (workoutName.isNotEmpty) {
+              print('Workout Name Entered: $workoutName');
+              Navigator.of(dialogContext).pop();
+            } else {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                const SnackBar(content: Text('Workout name cannot be empty')),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAddWorkoutDialogContent(
+    TextEditingController controller,
+    BuildContext context,
+  ) {
+    return SingleChildScrollView(
+      child: ListBody(
+        children: <Widget>[
+          FitTickTextField(controller: controller, labelText: 'Workout Name'),
+        ],
       ),
     );
   }
@@ -83,7 +121,8 @@ class HomeScreen extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.primary, // Using primary for the title color
+                  color:
+                      colorScheme.primary, // Using primary for the title color
                   fontWeight: FontWeight.bold,
                 ),
               ),
