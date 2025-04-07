@@ -1,4 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fit_tick_mobile/core/di.dart';
 import 'package:fit_tick_mobile/core/firebase_options.dart';
 import 'package:fit_tick_mobile/features/home/home_screen.dart';
 import 'package:fit_tick_mobile/features/workout/workout_screen.dart';
@@ -9,7 +11,8 @@ import 'theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const FitTickApp());
+
+  runApp(ProviderScope(child: const FitTickApp()));
 }
 
 class FitTickApp extends StatelessWidget {
@@ -17,17 +20,26 @@ class FitTickApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
+    return Consumer(
+      builder: (context, ref, child) {
+        final authService = ref.watch(authServiceProvider);
 
-    TextTheme textTheme = createTextTheme(context, "Roboto", "Montserrat");
+        if (authService.currentUser == null) {
+          authService.signInAnonymously();
+        }
 
-    MaterialTheme theme = MaterialTheme(textTheme);
+        final brightness =
+            View.of(context).platformDispatcher.platformBrightness;
+        TextTheme textTheme = createTextTheme(context, "Roboto", "Montserrat");
+        MaterialTheme theme = MaterialTheme(textTheme);
 
-    return MaterialApp(
-      title: 'FitTick',
-      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-      home: const HomeScreen(),
-      routes: {'/workout': (context) => const WorkoutScreen()},
+        return MaterialApp(
+          title: 'FitTick',
+          theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+          home: const HomeScreen(),
+          routes: {'/workout': (context) => const WorkoutScreen()},
+        );
+      },
     );
   }
 }
