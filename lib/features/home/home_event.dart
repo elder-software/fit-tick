@@ -26,3 +26,18 @@ class _WorkoutsUpdated extends HomeEvent {
   @override
   List<Object> get props => [workouts];
 }
+
+class DeleteWorkout extends HomeEvent {
+  final String workoutId;
+
+  const DeleteWorkout({required this.workoutId});
+
+  @override
+  List<Object> get props => [workoutId];
+}
+
+class UpdateWorkout extends HomeEvent {
+  final Workout workout;
+
+  const UpdateWorkout({required this.workout});
+}

@@ -5,6 +5,7 @@ import 'package:fit_tick_mobile/ui/dialog.dart';
 import 'package:fit_tick_mobile/features/home/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fit_tick_mobile/ui/card.dart';
+import 'package:fit_tick_mobile/data/workout/workout.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final homeBloc = context.read<HomeBloc>();
 
     return Scaffold(
       appBar: AppBar(
@@ -70,7 +72,43 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: workout.name,
                           details: workout.id ?? 'No ID',
                           onTap: () {},
-                          onTapMore: () => {},
+                          onTapMore:
+                              () => {
+                                _showWorkoutOptionsBottomSheet(
+                                  context,
+                                  workout.name,
+                                  onEdit: () {
+                                    _showWorkoutNameDialog(
+                                      context,
+                                      workout.name,
+                                      (String name) {
+                                        homeBloc.add(
+                                          UpdateWorkout(
+                                            workout: Workout(
+                                              id: workout.id,
+                                              userId: workout.userId,
+                                              name: name,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  onDelete: () {
+                                    _showDeleteWorkoutDialog(
+                                      context,
+                                      workout.name,
+                                      () {
+                                        homeBloc.add(
+                                          DeleteWorkout(
+                                            workoutId: workout.id ?? '',
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              },
                         );
                       },
                     );
@@ -91,17 +129,59 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: StandardFloatingActionButton(
         icon: Icons.add,
         onPressed: () {
-          _showAddWorkoutDialog(context, context.read<HomeBloc>());
+          _showWorkoutNameDialog(context, null, (String name) {
+            homeBloc.add(CreateWorkout(name: name));
+          });
         },
       ),
     );
   }
 
-  Future<void> _showAddWorkoutDialog(
+  void _showWorkoutOptionsBottomSheet(
     BuildContext context,
-    HomeBloc homeBloc,
+    String title, {
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return Wrap(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32.0, 32.0, 32.0, 16.0),
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit'),
+              onTap: () {
+                Navigator.pop(ctx); // Close the bottom sheet
+                onEdit(); // Call the provided callback
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: const Text('Delete'),
+              onTap: () {
+                Navigator.pop(ctx); // Close the bottom sheet
+                onDelete(); // Call the provided callback
+              },
+            ),
+            const SizedBox(height: 120.0), // Use existing increased padding
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showWorkoutNameDialog(
+    BuildContext context,
+    String? workoutName,
+    Function(String) onConfirm,
   ) async {
     final TextEditingController controller = TextEditingController();
+    controller.text = workoutName ?? '';
 
     return showDialog<void>(
       context: context,
@@ -110,15 +190,13 @@ class _HomeScreenState extends State<HomeScreen> {
         // Pass the controller and use the correct context for ScaffoldMessenger
         return StandardDialog(
           title: 'Workout Name',
-          content: _buildAddWorkoutDialogContent(controller),
-          onSave: () {
+          content: FitTickTextField(controller: controller),
+          onConfirm: () {
             String workoutName = controller.text;
             if (workoutName.isNotEmpty) {
-              // Add event to the bloc instance
-              homeBloc.add(CreateWorkout(name: workoutName));
+              onConfirm(workoutName);
               Navigator.of(dialogContext).pop(); // Close the dialog on success
             } else {
-              // Show SnackBar using the dialog's context
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 const SnackBar(content: Text('Workout name cannot be empty')),
               );
@@ -129,13 +207,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAddWorkoutDialogContent(TextEditingController controller) {
-    return SingleChildScrollView(
-      child: ListBody(
-        children: <Widget>[
-          FitTickTextField(controller: controller, labelText: 'Workout Name'),
-        ],
-      ),
+  Future<void> _showDeleteWorkoutDialog(
+    BuildContext context,
+    String workoutName,
+    VoidCallback onConfirm,
+  ) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StandardDialog(
+          title: 'Delete Workout',
+          content: Text('Are you sure you want to delete this workout?'),
+          onConfirm: () {
+            Navigator.of(dialogContext).pop();
+            onConfirm();
+          },
+        );
+      },
     );
   }
 }

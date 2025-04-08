@@ -20,6 +20,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<LoadWorkouts>(_onLoadWorkouts);
     on<_WorkoutsUpdated>(_onWorkoutsUpdated);
     on<CreateWorkout>(_onCreateWorkout);
+    on<DeleteWorkout>(_onDeleteWorkout);
+    on<UpdateWorkout>(_onUpdateWorkout);
   }
 
   void _onLoadWorkouts(LoadWorkouts event, Emitter<HomeState> emit) {
@@ -51,15 +53,36 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     CreateWorkout event,
     Emitter<HomeState> emit,
   ) async {
-    final userId = _authService.currentUser?.uid;
-    if (userId == null) {
-      emit(const HomeError(message: 'User not authenticated'));
-      return;
-    }
-
     try {
+      final userId = _authService.currentUser?.uid;
+      if (userId == null) {
+        emit(const HomeError(message: 'Error creating workout'));
+        return;
+      }
       final workout = Workout(userId: userId, name: event.name);
       await _workoutRepo.createWorkout(workout);
+    } catch (e) {
+      emit(HomeError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteWorkout(
+    DeleteWorkout event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      await _workoutRepo.deleteWorkout(event.workoutId);
+    } catch (e) {
+      emit(HomeError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateWorkout(
+    UpdateWorkout event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      await _workoutRepo.updateWorkout(event.workout);
     } catch (e) {
       emit(HomeError(message: e.toString()));
     }

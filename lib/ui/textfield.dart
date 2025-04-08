@@ -10,7 +10,7 @@ class FitTickTextField extends StatelessWidget {
   const FitTickTextField({
     super.key,
     required this.controller,
-    required this.labelText,
+    this.labelText = '',
     this.hintText = '',
     this.errorText = '',
     this.isPassword = false,
@@ -24,7 +24,7 @@ class FitTickTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        labelText: labelText,
+        labelText: labelText.isNotEmpty ? labelText : null,
         hintText: hintText.isNotEmpty ? hintText : null,
         errorText: errorText.isNotEmpty ? errorText : null,
         labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),

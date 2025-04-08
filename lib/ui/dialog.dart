@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class StandardDialog extends StatelessWidget {
   final String title;
   final Widget content;
-  final VoidCallback onSave;
+  final VoidCallback onConfirm;
   final VoidCallback? onCancel;
 
   const StandardDialog({
     super.key,
     required this.title,
     required this.content,
-    required this.onSave,
+    required this.onConfirm,
     this.onCancel,
   });
 
@@ -35,8 +35,8 @@ class StandardDialog extends StatelessWidget {
           child: Text('Cancel', style: TextStyle(color: colorScheme.primary)),
         ),
         TextButton(
-          onPressed: onSave,
-          child: Text('Save', style: TextStyle(color: colorScheme.primary)),
+          onPressed: onConfirm,
+          child: Text('Confirm', style: TextStyle(color: colorScheme.primary)),
         ),
       ],
     );
