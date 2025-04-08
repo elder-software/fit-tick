@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
@@ -10,45 +11,63 @@ part 'home_state.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final AuthService _authService;
   final WorkoutRepo _workoutRepo;
+  StreamSubscription<List<Workout>>? _workoutSubscription;
 
   HomeBloc({required AuthService authService, required WorkoutRepo workoutRepo})
     : _authService = authService,
       _workoutRepo = workoutRepo,
       super(HomeInitial()) {
-    on<HomeEvent>((event, emit) async {
-      if (event is CreateWorkout) {
-        emit(HomeLoading());
-        try {
-          final userId = _authService.currentUser?.uid;
-          if (userId == null) {
-            throw Exception('User not authenticated');
-          }
-          final workoutId = DateTime.now().millisecondsSinceEpoch.toString();
+    on<LoadWorkouts>(_onLoadWorkouts);
+    on<_WorkoutsUpdated>(_onWorkoutsUpdated);
+    on<CreateWorkout>(_onCreateWorkout);
+  }
 
-          final workout = Workout(
-            id: workoutId,
-            userId: userId,
-            name: event.name,
-          );
+  void _onLoadWorkouts(LoadWorkouts event, Emitter<HomeState> emit) {
+    final userId = _authService.currentUser?.uid;
+    if (userId == null) {
+      emit(const HomeError(message: 'User not authenticated'));
+      return;
+    }
 
-          await _workoutRepo.addWorkout(workout);
-          emit(HomeLoaded(workouts: [workout]));
-        } catch (e) {
-          emit(HomeError(message: e.toString()));
-        }
-      } else if (event is LoadWorkouts) {
-        emit(HomeLoading());
-        try {
-          final userId = _authService.currentUser?.uid;
-          if (userId == null) {
-            throw Exception('User not authenticated');
-          }
-          final workouts = await _workoutRepo.allWorkoutsForUser(userId);
-          emit(HomeLoaded(workouts: workouts));
-        } catch (e) {
-          emit(HomeError(message: e.toString()));
-        }
-      }
-    });
+    emit(HomeLoading());
+    _workoutSubscription?.cancel();
+    _workoutSubscription = _workoutRepo
+        .allWorkoutsForUser(userId)
+        .listen(
+          (workouts) {
+            add(_WorkoutsUpdated(workouts));
+          },
+          onError: (error) {
+            emit(HomeError(message: error.toString()));
+          },
+        );
+  }
+
+  void _onWorkoutsUpdated(_WorkoutsUpdated event, Emitter<HomeState> emit) {
+    emit(HomeLoaded(workouts: event.workouts));
+  }
+
+  Future<void> _onCreateWorkout(
+    CreateWorkout event,
+    Emitter<HomeState> emit,
+  ) async {
+    final userId = _authService.currentUser?.uid;
+    if (userId == null) {
+      emit(const HomeError(message: 'User not authenticated'));
+      return;
+    }
+
+    try {
+      final workout = Workout(userId: userId, name: event.name);
+      await _workoutRepo.createWorkout(workout);
+    } catch (e) {
+      emit(HomeError(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _workoutSubscription?.cancel();
+    return super.close();
   }
 }

@@ -41,7 +41,7 @@ class FitTickApp extends StatelessWidget {
           theme: brightness == Brightness.light ? theme.light() : theme.dark(),
           home: BlocProvider.value(
             value: homeBloc,
-            child: HomeScreen(homeBloc: homeBloc),
+            child: HomeScreen(),
           ),
           routes: {'/workout': (context) => const WorkoutScreen()},
         );

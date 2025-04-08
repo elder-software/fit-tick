@@ -5,7 +5,7 @@ class Workout {
   final String userId;
   final String name;
 
-  Workout({required this.id, required this.userId, required this.name});
+  Workout({this.id, required this.userId, required this.name});
 
   factory Workout.fromJson(Map<String, dynamic> json) {
     return Workout(

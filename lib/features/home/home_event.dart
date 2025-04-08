@@ -17,3 +17,12 @@ class CreateWorkout extends HomeEvent {
 }
 
 class LoadWorkouts extends HomeEvent {}
+
+class _WorkoutsUpdated extends HomeEvent {
+  final List<Workout> workouts;
+
+  const _WorkoutsUpdated(this.workouts);
+
+  @override
+  List<Object> get props => [workouts];
+}
