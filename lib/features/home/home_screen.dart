@@ -1,8 +1,10 @@
+import 'package:fit_tick_mobile/ui/fab.dart';
 import 'package:fit_tick_mobile/ui/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:fit_tick_mobile/ui/dialog.dart';
 import 'package:fit_tick_mobile/features/home/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fit_tick_mobile/ui/card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -65,14 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       itemCount: state.workouts.length,
                       itemBuilder: (context, index) {
                         final workout = state.workouts[index];
-                        return _buildWorkoutCard(
-                          context: context,
+                        return FitTickStandardCard(
                           title: workout.name,
                           details: workout.id ?? 'No ID',
-                          onTap: () {
-                            // TODO: Navigate to workout details, passing workout id/object
-                            // Navigator.pushNamed(context, '/workout', arguments: workout);
-                          },
+                          onTap: () {},
+                          onTapMore: () => {},
                         );
                       },
                     );
@@ -87,13 +85,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButtonLocation: const CenterUpFloatingActionButtonLocation(
+        24.0,
+      ),
+      floatingActionButton: StandardFloatingActionButton(
+        icon: Icons.add,
         onPressed: () {
           _showAddWorkoutDialog(context, context.read<HomeBloc>());
         },
-        backgroundColor: colorScheme.tertiaryContainer,
-        foregroundColor: colorScheme.onTertiaryContainer,
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -130,60 +129,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Removed context parameter as it's not used
   Widget _buildAddWorkoutDialogContent(TextEditingController controller) {
     return SingleChildScrollView(
       child: ListBody(
         children: <Widget>[
           FitTickTextField(controller: controller, labelText: 'Workout Name'),
         ],
-      ),
-    );
-  }
-
-  Widget _buildWorkoutCard({
-    required BuildContext context,
-    required String title,
-    required String details,
-    required Function() onTap,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.0),
-      // Add some margin between cards
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 16.0),
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
-        color: colorScheme.surface,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                details,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
