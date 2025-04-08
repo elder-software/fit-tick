@@ -19,17 +19,18 @@ class FitTickStandardCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.0),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 16.0),
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
-        color: colorScheme.surface,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16.0),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      color: colorScheme.surface,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.0),
         child: Padding(
           padding:
               onTapMore == null
