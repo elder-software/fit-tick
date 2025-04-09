@@ -7,6 +7,8 @@ import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fit_tick_mobile/ui/dialog.dart';
+import 'package:fit_tick_mobile/ui/textfield.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -42,18 +44,41 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         String pageTitle;
         Widget bodyContent;
         List<Widget> pageTitleButtons = [];
+        final workoutBloc = context.read<WorkoutBloc>();
 
         if (state is WorkoutLoaded) {
-          pageTitle = state.workout.name;
+          final workout = state.workout;
+          pageTitle = workout.name;
           pageTitleButtons = [
             StyledIconButton(
               icon: Icons.more_vert,
               showBorder: false,
-              onPressed: () => {},
+              onPressed:
+                  () => _showWorkoutOptionsBottomSheet(
+                    context,
+                    workout.name,
+                    onEdit: () {
+                      _showWorkoutNameDialog(context, workout.name, (
+                        String name,
+                      ) {
+                        workoutBloc.add(
+                          UpdateWorkout(workout: workout.copyWith(name: name)),
+                        );
+                      });
+                    },
+                    onDelete: () {
+                      _showDeleteWorkoutDialog(context, workout.name, () {
+                        workoutBloc.add(
+                          DeleteWorkout(workoutId: workout.id ?? ''),
+                        );
+                        Navigator.of(context).pop();
+                      });
+                    },
+                  ),
             ),
           ];
           bodyContent = WorkoutLoadedWidget(
-            workout: state.workout,
+            workout: workout,
             exercises: state.exercises,
           );
         } else if (state is ErrorScreen) {
@@ -75,9 +100,103 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          children: [
-            Expanded(child: bodyContent),
+          children: [Expanded(child: bodyContent)],
+        );
+      },
+    );
+  }
+
+  void _showWorkoutOptionsBottomSheet(
+    BuildContext context,
+    String workoutName, {
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return Wrap(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                workoutName,
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit Name'),
+              onTap: () {
+                Navigator.pop(ctx);
+                onEdit();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: const Text('Delete'),
+              onTap: () {
+                Navigator.pop(ctx);
+                onDelete();
+              },
+            ),
+            const SizedBox(height: 128),
           ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showWorkoutNameDialog(
+    BuildContext context,
+    String? workoutName,
+    Function(String) onConfirm,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    controller.text = workoutName ?? '';
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StandardDialog(
+          title: 'Edit Workout Name',
+          content: FitTickTextField(
+            controller: controller,
+            labelText: 'Workout Name',
+          ),
+          onConfirm: () {
+            String newWorkoutName = controller.text;
+            if (newWorkoutName.isNotEmpty) {
+              onConfirm(newWorkoutName);
+              Navigator.of(dialogContext).pop();
+            } else {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                const SnackBar(content: Text('Workout name cannot be empty')),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDeleteWorkoutDialog(
+    BuildContext context,
+    String workoutName,
+    VoidCallback onConfirm,
+  ) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StandardDialog(
+          title: 'Delete Workout',
+          content: Text('Are you sure you want to delete "$workoutName"?'),
+          onConfirm: () {
+            Navigator.of(dialogContext).pop();
+            onConfirm();
+          },
         );
       },
     );

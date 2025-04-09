@@ -24,3 +24,19 @@ class WorkoutError extends WorkoutEvent {
   @override
   List<Object> get props => [message];
 }
+
+class UpdateWorkout extends WorkoutEvent {
+  final Workout workout;
+  const UpdateWorkout({required this.workout});
+
+  @override
+  List<Object> get props => [workout];
+}
+
+class DeleteWorkout extends WorkoutEvent {
+  final String workoutId;
+  const DeleteWorkout({required this.workoutId});
+
+  @override
+  List<Object> get props => [workoutId];
+}

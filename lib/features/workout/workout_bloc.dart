@@ -20,6 +20,8 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
        super(Initial()) {
     on<LoadScreen>(_onLoadScreen);
     on<InitialEvent>(_onInitialEvent);
+    on<UpdateWorkout>(_onUpdateWorkout);
+    on<DeleteWorkout>(_onDeleteWorkout);
   }
 
   void _onLoadScreen(LoadScreen event, Emitter<WorkoutState> emit) async {
@@ -37,5 +39,41 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
 
   void _onInitialEvent(InitialEvent event, Emitter<WorkoutState> emit) {
     emit(Initial());
+  }
+
+  Future<void> _onUpdateWorkout(
+    UpdateWorkout event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    try {
+      await _workoutRepo.updateWorkout(event.workout);
+      if (state is WorkoutLoaded) {
+        final currentState = state as WorkoutLoaded;
+        emit(
+          WorkoutLoaded(
+            workout: event.workout,
+            exercises: currentState.exercises,
+          ),
+        );
+      } else {
+        add(LoadScreen(workoutId: event.workout.id ?? ''));
+      }
+    } catch (e) {
+      print(e);
+      emit(ErrorScreen(message: 'Error updating workout.'));
+    }
+  }
+
+  Future<void> _onDeleteWorkout(
+    DeleteWorkout event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    try {
+      await _workoutRepo.deleteWorkout(event.workoutId);
+      emit(Initial());
+    } catch (e) {
+      print(e);
+      emit(ErrorScreen(message: 'Error deleting workout.'));
+    }
   }
 }

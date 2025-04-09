@@ -30,4 +30,16 @@ class Workout {
       name: data['name'] ?? '',
     );
   }
+
+  Workout copyWith({
+    String? id,
+    String? userId,
+    String? name,
+  }) {
+    return Workout(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+    );
+  }
 }
