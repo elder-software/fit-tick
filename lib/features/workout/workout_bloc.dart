@@ -20,6 +20,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
        _exerciseRepo = exerciseRepo,
        super(Initial()) {
     on<LoadScreen>(_onLoadScreen);
+    on<InitialEvent>(_onInitialEvent);
   }
 
   void _onLoadScreen(LoadScreen event, Emitter<WorkoutState> emit) async {
@@ -31,7 +32,11 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       emit(WorkoutLoaded(workout: workout, exercises: exercises));
     } catch (e) {
       print(e);
-      emit(WorkoutError(message: 'Error loading workout.'));
+      emit(ErrorScreen(message: 'Error loading workout.'));
     }
+  }
+
+  void _onInitialEvent(InitialEvent event, Emitter<WorkoutState> emit) {
+    emit(Initial());
   }
 }

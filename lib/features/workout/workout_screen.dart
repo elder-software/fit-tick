@@ -17,45 +17,65 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<WorkoutBloc>().add(InitialEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final workoutId = args?['workoutId'] as String?;
+      if (workoutId != null) {
+        context.read<WorkoutBloc>().add(LoadScreen(workoutId: workoutId));
+      } else {
+        print("Error: workoutId is null");
+        context.read<WorkoutBloc>().add(
+          WorkoutError(message: 'Could not load workout'),
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final workoutId = args?['workoutId'] as String?;
+    return BlocBuilder<WorkoutBloc, WorkoutState>(
+      builder: (context, state) {
+        String pageTitle;
+        Widget bodyContent;
+        List<Widget> pageTitleButtons = []; // Default to empty
 
-    context.read<WorkoutBloc>().add(LoadScreen(workoutId: workoutId ?? ''));
+        if (state is WorkoutLoaded) {
+          pageTitle = state.workout.name; // Use workout name
+          pageTitleButtons = [
+            StyledIconButton(icon: Icons.edit, onPressed: () => {}),
+            StyledIconButton(icon: Icons.add, onPressed: () => {}),
+          ];
+          bodyContent = WorkoutLoadedWidget(
+            workout: state.workout,
+            exercises: state.exercises,
+          );
+        } else if (state is ErrorScreen) {
+          pageTitle = 'Error';
+          bodyContent = Center(child: Text(state.message));
+        } else {
+          // Handle WorkoutInitial or other loading states
+          pageTitle = 'Loading Workout...';
+          bodyContent = const Center(child: CircularProgressIndicator());
+        }
 
-    return FitTickStandardScreen(
-      topBarTitle: 'Workout',
-      pageTitle:  'Workout Details',
-      pageTitleButtons: Row(
-        children: [
-          StyledIconButton(icon: Icons.edit, onPressed: () => {}),
-          StyledIconButton(icon: Icons.add, onPressed: () => {}),
-        ],
-      ),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      children: [
-        BlocBuilder<WorkoutBloc, WorkoutState>(
-          builder: (context, state) {
-            if (state is WorkoutLoaded) {
-              return WorkoutLoadedWidget(
-                workout: state.workout,
-                exercises: state.exercises,
-              );
-            } else if (state is WorkoutError) {
-              return Center(child: Text(state.message));
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          },
-        ),
-      ],
+        // Build the screen UI based on the current state
+        return FitTickStandardScreen(
+          topBarTitle: 'Workout', // Keep top bar title consistent
+          pageTitle: pageTitle, // Dynamic page title
+          pageTitleButtons: Row(
+            // Use defined buttons, ensure Row takes minimum space
+            mainAxisSize: MainAxisSize.min,
+            children: pageTitleButtons,
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          children: [bodyContent], // Place the dynamic content here
+        );
+      },
     );
   }
 }

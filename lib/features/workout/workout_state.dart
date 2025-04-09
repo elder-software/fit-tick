@@ -19,8 +19,8 @@ class WorkoutLoaded extends WorkoutState {
   List<Object> get props => [workout, exercises];
 }
 
-class WorkoutError extends WorkoutState {
+class ErrorScreen extends WorkoutState {
   final String message;
 
-  const WorkoutError({required this.message});
+  const ErrorScreen({required this.message});
 }
