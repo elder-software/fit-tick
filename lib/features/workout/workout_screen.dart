@@ -95,11 +95,23 @@ class WorkoutLoadedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Center(child: Text('Round', style: theme.textTheme.titleMedium)),
         const SizedBox(height: 8),
-        Counter(onChanged: (value) => print(value)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Counter(onChanged: (value) => print(value)),
+              Counter(onChanged: (value) => print(value)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         Divider(height: 16),
         ...exercises.map((exercise) => Text('Exercise: ${exercise.name}')),
       ],
