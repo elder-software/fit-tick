@@ -61,8 +61,8 @@ class _CounterState extends State<Counter> {
     } else {
       _controller.text = '$_count';
       _controller.selection = TextSelection.fromPosition(
-          TextPosition(offset: _controller.text.length),
-        );
+        TextPosition(offset: _controller.text.length),
+      );
     }
   }
 
@@ -70,12 +70,12 @@ class _CounterState extends State<Counter> {
     final text = _controller.text;
     final value = int.tryParse(text);
     if (value != null) {
-       _updateCount(value);
+      _updateCount(value);
     } else {
       _controller.text = '$_count';
-        _controller.selection = TextSelection.fromPosition(
-          TextPosition(offset: _controller.text.length),
-        );
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: _controller.text.length),
+      );
     }
   }
 
@@ -126,6 +126,9 @@ class _CounterState extends State<Counter> {
                       contentPadding: EdgeInsets.symmetric(vertical: 0),
                     ),
                     onSubmitted: (value) => _updateCountFromTextField(),
+                    onTapOutside: (event) {
+                      _focusNode.unfocus();
+                    },
                   ),
                 ),
               ),
