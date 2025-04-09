@@ -35,15 +35,20 @@ class FitTickApp extends StatelessWidget {
         MaterialTheme theme = MaterialTheme(textTheme);
 
         final homeBloc = ref.watch(homeBlocProvider);
+        final workoutBloc = ref.watch(workoutBlocProvider);
 
         return MaterialApp(
           title: 'FitTick',
           theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-          home: BlocProvider.value(
-            value: homeBloc,
-            child: HomeScreen(),
-          ),
-          routes: {'/workout': (context) => const WorkoutScreen()},
+          home: BlocProvider.value(value: homeBloc, child: HomeScreen()),
+          routes: {
+            '/workout': (context) {
+              return BlocProvider.value(
+                value: workoutBloc,
+                child: WorkoutScreen(),
+              );
+            },
+          },
         );
       },
     );

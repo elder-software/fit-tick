@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.pushNamed(
                           context,
                           '/workout',
-                          arguments: workout.id,
+                          arguments: {'workoutId': workout.id},
                         );
                       },
                       onTapMore:

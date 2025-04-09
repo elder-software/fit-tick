@@ -1,3 +1,5 @@
+import 'package:fit_tick_mobile/data/exercise/exercise_repo.dart';
+import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fit_tick_mobile/data/auth/auth_service.dart'; // Adjust the import path if necessary
 import 'package:fit_tick_mobile/data/workout/workout_repo.dart';
@@ -11,10 +13,20 @@ final workoutRepoProvider = Provider<WorkoutRepo>((ref) {
   return WorkoutRepo();
 });
 
+final exerciseRepoProvider = Provider<ExerciseRepo>((ref) {
+  return ExerciseRepo();
+});
+
 final homeBlocProvider = Provider<HomeBloc>((ref) {
-  final authService = ref.read(authServiceProvider);
-  final workoutRepo = ref.read(workoutRepoProvider);
-  final bloc = HomeBloc(authService: authService, workoutRepo: workoutRepo);
-  bloc.add(LoadWorkouts()); 
-  return bloc;
+  return HomeBloc(
+    authService: ref.read(authServiceProvider),
+    workoutRepo: ref.read(workoutRepoProvider),
+  );
+});
+
+final workoutBlocProvider = Provider<WorkoutBloc>((ref) {
+  return WorkoutBloc(
+    workoutRepo: ref.read(workoutRepoProvider),
+    exerciseRepo: ref.read(exerciseRepoProvider),
+  );
 });
