@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class FitTickStandardScreen extends StatelessWidget {
   final String topBarTitle;
   final String pageTitle;
+  final Widget? pageTitleButtons;
   final List<Widget> children;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
@@ -14,6 +15,7 @@ class FitTickStandardScreen extends StatelessWidget {
     required this.topBarTitle,
     required this.pageTitle,
     required this.children,
+    this.pageTitleButtons,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.leading,
@@ -35,7 +37,13 @@ class FitTickStandardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(pageTitle, style: theme.textTheme.headlineSmall),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(pageTitle, style: theme.textTheme.headlineSmall),
+                if (pageTitleButtons != null) pageTitleButtons!,
+              ],
+            ),
             const Divider(height: 32.0),
             Expanded(
               // Wrap children in a Column in case there are multiple

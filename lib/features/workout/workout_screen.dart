@@ -1,6 +1,7 @@
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
+import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,7 +29,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     return FitTickStandardScreen(
       topBarTitle: 'Workout',
-      pageTitle: 'Workout Details',
+      pageTitle:  'Workout Details',
+      pageTitleButtons: Row(
+        children: [
+          StyledIconButton(icon: Icons.edit, onPressed: () => {}),
+          StyledIconButton(icon: Icons.add, onPressed: () => {}),
+        ],
+      ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.of(context).pop(),
