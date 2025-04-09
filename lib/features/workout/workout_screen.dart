@@ -1,6 +1,7 @@
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
+import 'package:fit_tick_mobile/ui/counter.dart';
 import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +45,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         if (state is WorkoutLoaded) {
           pageTitle = state.workout.name; // Use workout name
           pageTitleButtons = [
-            StyledIconButton(icon: Icons.edit, onPressed: () => {}),
-            StyledIconButton(icon: Icons.add, onPressed: () => {}),
+            StyledIconButton(
+              icon: Icons.more_vert,
+              showBorder: false,
+              onPressed: () => {},
+            ),
           ];
           bodyContent = WorkoutLoadedWidget(
             workout: state.workout,
@@ -94,8 +98,9 @@ class WorkoutLoadedWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Details for workout: ${workout.name}'),
         const SizedBox(height: 8),
+        Counter(onChanged: (value) => print(value)),
+        Divider(height: 16),
         ...exercises.map((exercise) => Text('Exercise: ${exercise.name}')),
       ],
     );
