@@ -1,6 +1,7 @@
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
+import 'package:fit_tick_mobile/features/workout/workout_exercise_card.dart';
 import 'package:fit_tick_mobile/ui/counter.dart';
 import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
@@ -40,10 +41,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       builder: (context, state) {
         String pageTitle;
         Widget bodyContent;
-        List<Widget> pageTitleButtons = []; // Default to empty
+        List<Widget> pageTitleButtons = [];
 
         if (state is WorkoutLoaded) {
-          pageTitle = state.workout.name; // Use workout name
+          pageTitle = state.workout.name;
           pageTitleButtons = [
             StyledIconButton(
               icon: Icons.more_vert,
@@ -59,17 +60,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           pageTitle = 'Error';
           bodyContent = Center(child: Text(state.message));
         } else {
-          // Handle WorkoutInitial or other loading states
           pageTitle = 'Loading Workout...';
           bodyContent = const Center(child: CircularProgressIndicator());
         }
 
-        // Build the screen UI based on the current state
         return FitTickStandardScreen(
-          topBarTitle: 'Workout', // Keep top bar title consistent
-          pageTitle: pageTitle, // Dynamic page title
+          topBarTitle: 'Workout',
+          pageTitle: pageTitle,
           pageTitleButtons: Row(
-            // Use defined buttons, ensure Row takes minimum space
             mainAxisSize: MainAxisSize.min,
             children: pageTitleButtons,
           ),
@@ -77,7 +75,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          children: [bodyContent], // Place the dynamic content here
+          children: [
+            Expanded(child: bodyContent),
+          ],
         );
       },
     );
@@ -106,14 +106,83 @@ class WorkoutLoadedWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Counter(onChanged: (value) => print(value)),
-              Counter(onChanged: (value) => print(value)),
+              Counter(label: 'Amount', onChanged: (value) => print(value)),
+              Counter(label: 'Rest', onChanged: (value) => print(value)),
             ],
           ),
         ),
         const SizedBox(height: 16),
         Divider(height: 16),
-        ...exercises.map((exercise) => Text('Exercise: ${exercise.name}')),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Exercises', style: theme.textTheme.titleMedium),
+              IconButton.filledTonal(
+                icon: const Icon(Icons.add),
+                onPressed: () => print('add'),
+                style: IconButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                ),
+                padding: const EdgeInsets.all(8),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            children: <Widget>[
+              // ...exercises.map((exercise) => ExerciseCard(exercise: exercise)),
+              WorkoutExerciseCard(
+                exercise: Exercise(
+                  id: '1',
+                  name: 'Exercise 1',
+                  description: 'Description 1',
+                  exerciseTime: 10,
+                  restTime: 10,
+                ),
+              ),
+              WorkoutExerciseCard(
+                exercise: Exercise(
+                  id: '2',
+                  name: 'Exercise 2',
+                  description: 'Description 2',
+                  exerciseTime: 10,
+                  restTime: 10,
+                ),
+              ),
+              WorkoutExerciseCard(
+                exercise: Exercise(
+                  id: '3',
+                  name: 'Exercise 3',
+                  description: 'Description 3',
+                  exerciseTime: 10,
+                  restTime: 10,
+                ),
+              ),
+              WorkoutExerciseCard(
+                exercise: Exercise(
+                  id: '4',
+                  name: 'Exercise 4',
+                  description: 'Description 4',
+                  exerciseTime: 10,
+                  restTime: 10,
+                ),
+              ),
+              WorkoutExerciseCard(
+                exercise: Exercise(
+                  id: '5',
+                  name: 'Exercise 5',
+                  description: 'Description 5',
+                  exerciseTime: 10,
+                  restTime: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

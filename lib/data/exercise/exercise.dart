@@ -3,14 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Exercise {
   final String id;
   final String name;
-  final int? time;
+  final int? exerciseTime;
+  final int? restTime;
   final String? description;
   final String? imageUrl;
 
   Exercise({
     required this.id,
     required this.name,
-    this.time,
+    this.exerciseTime,
+    this.restTime,
     this.description,
     this.imageUrl,
   });
@@ -19,7 +21,8 @@ class Exercise {
     return Exercise(
       id: id,
       name: json['name'],
-      time: json['time'],
+      exerciseTime: json['exerciseTime'],
+      restTime: json['restTime'],
       description: json['description'],
       imageUrl: json['imageUrl'],
     );
@@ -29,7 +32,8 @@ class Exercise {
     return {
       'id': id,
       'name': name,
-      'time': time,
+      'exerciseTime': exerciseTime,
+      'restTime': restTime,
       'description': description,
       'imageUrl': imageUrl,
     };
