@@ -30,7 +30,6 @@ class Exercise {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
       'exerciseTime': exerciseTime,
       'restTime': restTime,

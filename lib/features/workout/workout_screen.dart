@@ -240,7 +240,12 @@ class WorkoutLoadedWidget extends StatelessWidget {
               Text('Exercises', style: theme.textTheme.titleMedium),
               IconButton.filledTonal(
                 icon: const Icon(Icons.add),
-                onPressed: () => Navigator.pushNamed(context, '/exercise'),
+                onPressed:
+                    () => Navigator.pushNamed(
+                      context,
+                      '/exercise',
+                      arguments: {'workoutId': workout.id},
+                    ),
                 style: IconButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
