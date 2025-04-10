@@ -83,14 +83,20 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               _showEditDeleteBottomSheet(
                 context,
                 exercise.name.isNotEmpty ? exercise.name : 'Exercise',
-                onEdit: () {
-                  Navigator.of(context).pushNamed(
+                onEdit: () async {
+                  final result = await Navigator.of(context).pushNamed(
                     '/exercise',
                     arguments: {
                       'workoutId': workout.id,
                       'exerciseId': exercise.id,
                     },
                   );
+                  if (!context.mounted) return;
+                  if (result == true) {
+                    context.read<WorkoutBloc>().add(
+                      LoadExercises(workoutId: workout.id, workout: workout),
+                    );
+                  }
                 },
                 onDelete: () {
                   workoutBloc.add(

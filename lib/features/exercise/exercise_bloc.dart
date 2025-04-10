@@ -22,7 +22,11 @@ class ExerciseBloc extends Bloc<ExerciseEvent, ExerciseState> {
   ) async {
     emit(ExerciseLoaded(event.exercise, event.workoutId, isSaving: true));
     try {
-      await _exerciseRepo.createExercise(event.workoutId, event.exercise);
+      if (event.exercise.id.isEmpty) {
+        await _exerciseRepo.createExercise(event.workoutId, event.exercise);
+      } else {
+        await _exerciseRepo.updateExercise(event.workoutId, event.exercise);
+      }
       emit(ExerciseSaveSuccess());
     } catch (e) {
       emit(ExerciseError(e.toString()));

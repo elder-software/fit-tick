@@ -53,6 +53,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         if (state is ExerciseSaveSuccess) {
           Navigator.of(context).pop(true);
         }
+        if (state is ExerciseLoaded && state.exercise != null) {
+          _nameController.text = state.exercise!.name;
+          _descriptionController.text = state.exercise!.description ?? '';
+        }
       },
       child: BlocBuilder<ExerciseBloc, ExerciseState>(
         builder: (context, state) {
@@ -91,12 +95,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                             children: [
                               Counter(
                                 label: 'Exercise Time (sec)',
+                                initialValue: state.exercise?.exerciseTime ?? 0,
                                 onChanged:
                                     (value) => _exerciseTimeController = value,
                               ),
                               Counter(
                                 label: 'Rest Time (sec)',
-                                onChanged: (value) => _restTimeController = value,
+                                initialValue: state.exercise?.restTime ?? 0,
+                                onChanged:
+                                    (value) => _restTimeController = value,
                               ),
                             ],
                           ),
@@ -120,7 +127,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                       exercise: Exercise(
                                         id: state.exercise?.id ?? '',
                                         name: _nameController.text,
-                                        description: _descriptionController.text,
+                                        description:
+                                            _descriptionController.text,
                                         exerciseTime: _exerciseTimeController,
                                         restTime: _restTimeController,
                                       ),
@@ -130,13 +138,13 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                 child:
                                     state.isSaving
                                         ? SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: theme.colorScheme.onSurface,
-                                            ),
-                                          )
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        )
                                         : const Text('Save'),
                               ),
                             ),
