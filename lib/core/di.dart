@@ -1,4 +1,5 @@
 import 'package:fit_tick_mobile/data/exercise/exercise_repo.dart';
+import 'package:fit_tick_mobile/features/timer/timer_bloc.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fit_tick_mobile/data/auth/auth_service.dart'; // Adjust the import path if necessary
@@ -33,7 +34,9 @@ final workoutBlocProvider = Provider<WorkoutBloc>((ref) {
 });
 
 final exerciseBlocProvider = Provider<ExerciseBloc>((ref) {
-  return ExerciseBloc(
-    exerciseRepo: ref.read(exerciseRepoProvider),
-  );
+  return ExerciseBloc(exerciseRepo: ref.read(exerciseRepoProvider));
+});
+
+final timerBlocProvider = Provider<TimerBloc>((ref) {
+  return TimerBloc();
 });

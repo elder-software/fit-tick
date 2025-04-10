@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fit_tick_mobile/features/timer/timer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fit_tick_mobile/core/di.dart';
 import 'package:fit_tick_mobile/core/firebase_options.dart';
@@ -61,4 +62,10 @@ class FitTickApp extends StatelessWidget {
       },
     );
   }
+}
+
+// Created here, so that feature directories aren't importing from each other
+Widget buildTimerModal(BuildContext context, WidgetRef ref) {
+  final timerBloc = ref.read(timerBlocProvider);
+  return BlocProvider.value(value: timerBloc, child: const TimerScreen());
 }

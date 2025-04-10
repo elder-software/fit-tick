@@ -2,22 +2,24 @@ import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:fit_tick_mobile/features/workout/workout_exercise_card.dart';
+import 'package:fit_tick_mobile/main.dart';
 import 'package:fit_tick_mobile/ui/counter.dart';
 import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fit_tick_mobile/ui/dialog.dart';
 import 'package:fit_tick_mobile/ui/textfield.dart';
 
-class WorkoutScreen extends StatefulWidget {
+class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
 
   @override
-  State<WorkoutScreen> createState() => _WorkoutScreenState();
+  ConsumerState<WorkoutScreen> createState() => _WorkoutScreenState();
 }
 
-class _WorkoutScreenState extends State<WorkoutScreen> {
+class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
@@ -120,6 +122,18 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         return FitTickStandardScreen(
           topBarTitle: 'Workout',
           pageTitle: pageTitle,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (BuildContext sheetContext) {
+                  return buildTimerModal(context, ref);
+                },
+              );
+            },
+            child: const Icon(Icons.play_arrow),
+          ),
           pageTitleButtons: Row(
             mainAxisSize: MainAxisSize.min,
             children: pageTitleButtons,
