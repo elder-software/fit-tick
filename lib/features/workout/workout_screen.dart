@@ -54,7 +54,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               icon: Icons.more_vert,
               showBorder: false,
               onPressed:
-                  () => _showWorkoutOptionsBottomSheet(
+                  () => _showEditDeleteBottomSheet(
                     context,
                     workout.name,
                     onEdit: () {
@@ -68,9 +68,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     },
                     onDelete: () {
                       _showDeleteWorkoutDialog(context, workout.name, () {
-                        workoutBloc.add(
-                          DeleteWorkout(workoutId: workout.id ?? ''),
-                        );
+                        workoutBloc.add(DeleteWorkout(workoutId: workout.id));
                         Navigator.of(context).pop();
                       });
                     },
@@ -80,6 +78,30 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           bodyContent = WorkoutLoadedWidget(
             workout: workout,
             exercises: state.exercises,
+            exercisesLoading: state.exercisesLoading,
+            onMoreOptionsPressed: (exercise) {
+              _showEditDeleteBottomSheet(
+                context,
+                exercise.name.isNotEmpty ? exercise.name : 'Exercise',
+                onEdit: () {
+                  Navigator.of(context).pushNamed(
+                    '/exercise',
+                    arguments: {
+                      'workoutId': workout.id,
+                      'exerciseId': exercise.id,
+                    },
+                  );
+                },
+                onDelete: () {
+                  workoutBloc.add(
+                    DeleteExercise(
+                      workoutId: workout.id,
+                      exerciseId: exercise.id,
+                    ),
+                  );
+                },
+              );
+            },
           );
         } else if (state is ErrorScreen) {
           pageTitle = 'Error';
@@ -106,7 +128,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
   }
 
-  void _showWorkoutOptionsBottomSheet(
+  void _showEditDeleteBottomSheet(
     BuildContext context,
     String workoutName, {
     required VoidCallback onEdit,
@@ -127,7 +149,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('Edit Name'),
+              title: const Text('Edit'),
               onTap: () {
                 Navigator.pop(ctx);
                 onEdit();
@@ -165,6 +187,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           content: FitTickTextField(
             controller: controller,
             labelText: 'Workout Name',
+            capitalizeWords: true,
           ),
           onConfirm: () {
             String newWorkoutName = controller.text;
@@ -206,10 +229,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 class WorkoutLoadedWidget extends StatelessWidget {
   final Workout workout;
   final List<Exercise> exercises;
+  final bool exercisesLoading;
+  final Function(Exercise) onMoreOptionsPressed;
   const WorkoutLoadedWidget({
     super.key,
     required this.workout,
     required this.exercises,
+    required this.exercisesLoading,
+    required this.onMoreOptionsPressed,
   });
 
   @override
@@ -258,52 +285,15 @@ class WorkoutLoadedWidget extends StatelessWidget {
         Expanded(
           child: ListView(
             children: <Widget>[
-              // ...exercises.map((exercise) => ExerciseCard(exercise: exercise)),
-              WorkoutExerciseCard(
-                exercise: Exercise(
-                  id: '1',
-                  name: 'Exercise 1',
-                  description: 'Description 1',
-                  exerciseTime: 10,
-                  restTime: 10,
+              if (exercisesLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                ...exercises.map(
+                  (exercise) => WorkoutExerciseCard(
+                    exercise: exercise,
+                    onMoreOptionsPressed: () => onMoreOptionsPressed(exercise),
+                  ),
                 ),
-              ),
-              WorkoutExerciseCard(
-                exercise: Exercise(
-                  id: '2',
-                  name: 'Exercise 2',
-                  description: 'Description 2',
-                  exerciseTime: 10,
-                  restTime: 10,
-                ),
-              ),
-              WorkoutExerciseCard(
-                exercise: Exercise(
-                  id: '3',
-                  name: 'Exercise 3',
-                  description: 'Description 3',
-                  exerciseTime: 10,
-                  restTime: 10,
-                ),
-              ),
-              WorkoutExerciseCard(
-                exercise: Exercise(
-                  id: '4',
-                  name: 'Exercise 4',
-                  description: 'Description 4',
-                  exerciseTime: 10,
-                  restTime: 10,
-                ),
-              ),
-              WorkoutExerciseCard(
-                exercise: Exercise(
-                  id: '5',
-                  name: 'Exercise 5',
-                  description: 'Description 5',
-                  exerciseTime: 10,
-                  restTime: 10,
-                ),
-              ),
             ],
           ),
         ),

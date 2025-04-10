@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Workout {
-  final String? id;
+  final String id;
   final String userId;
   final String name;
 
-  Workout({this.id, required this.userId, required this.name});
+  Workout({required this.id, required this.userId, required this.name});
 
   factory Workout.fromJson(Map<String, dynamic> json) {
     return Workout(
@@ -16,10 +16,8 @@ class Workout {
   }
 
   Map<String, dynamic> toJson() {
-    if (id == null) {
-      return {'userId': userId, 'name': name};
-    }
-    return {'id': id, 'userId': userId, 'name': name};
+    // id is not included in the JSON as it is either auto-generated or provided in the function it's used in
+    return {'userId': userId, 'name': name};
   }
 
   factory Workout.fromFirestore(DocumentSnapshot doc) {
@@ -31,11 +29,7 @@ class Workout {
     );
   }
 
-  Workout copyWith({
-    String? id,
-    String? userId,
-    String? name,
-  }) {
+  Workout copyWith({String? id, String? userId, String? name}) {
     return Workout(
       id: id ?? this.id,
       userId: userId ?? this.userId,

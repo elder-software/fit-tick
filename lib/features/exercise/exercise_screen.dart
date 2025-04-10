@@ -76,6 +76,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         FitTickTextField(
                           controller: _nameController,
                           labelText: 'Exercise Name',
+                          capitalizeWords: true,
                         ),
                         const SizedBox(height: 16),
                         FitTickTextField(

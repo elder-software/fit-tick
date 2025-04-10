@@ -12,11 +12,16 @@ class Initial extends WorkoutState {}
 class WorkoutLoaded extends WorkoutState {
   final Workout workout;
   final List<Exercise> exercises;
+  final bool exercisesLoading;
 
-  const WorkoutLoaded({required this.workout, required this.exercises});
+  const WorkoutLoaded({
+    required this.workout,
+    required this.exercises,
+    required this.exercisesLoading,
+  });
 
   @override
-  List<Object> get props => [workout, exercises];
+  List<Object> get props => [workout, exercises, exercisesLoading];
 }
 
 class ErrorScreen extends WorkoutState {

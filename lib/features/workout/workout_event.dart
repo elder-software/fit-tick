@@ -40,3 +40,21 @@ class DeleteWorkout extends WorkoutEvent {
   @override
   List<Object> get props => [workoutId];
 }
+
+class DeleteExercise extends WorkoutEvent {
+  final String workoutId;
+  final String exerciseId;
+  const DeleteExercise({required this.workoutId, required this.exerciseId});
+
+  @override
+  List<Object> get props => [workoutId, exerciseId];
+}
+
+class LoadExercises extends WorkoutEvent {
+  final String workoutId;
+  final Workout workout;
+  const LoadExercises({required this.workoutId, required this.workout});
+
+  @override
+  List<Object> get props => [workoutId, workout];
+}

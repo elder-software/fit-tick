@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final workout = state.workouts[index];
                     return FitTickStandardCard(
                       title: workout.name,
-                      details: workout.id ?? 'No ID',
+                      details: workout.id,
                       onTap: () {
                         Navigator.pushNamed(
                           context,
@@ -105,9 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   workout.name,
                                   () {
                                     homeBloc.add(
-                                      DeleteWorkout(
-                                        workoutId: workout.id ?? '',
-                                      ),
+                                      DeleteWorkout(workoutId: workout.id),
                                     );
                                   },
                                 );
@@ -182,7 +180,10 @@ class _HomeScreenState extends State<HomeScreen> {
         // Pass the controller and use the correct context for ScaffoldMessenger
         return StandardDialog(
           title: 'Workout Name',
-          content: FitTickTextField(controller: controller),
+          content: FitTickTextField(
+            controller: controller,
+            capitalizeWords: true,
+          ),
           onConfirm: () {
             String workoutName = controller.text;
             if (workoutName.isNotEmpty) {

@@ -59,7 +59,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(const HomeError(message: 'Error creating workout'));
         return;
       }
-      final workout = Workout(userId: userId, name: event.name);
+      final workout = Workout(id: '', userId: userId, name: event.name);
       await _workoutRepo.createWorkout(workout);
     } catch (e) {
       emit(HomeError(message: e.toString()));

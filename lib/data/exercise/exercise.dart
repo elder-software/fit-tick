@@ -17,18 +17,8 @@ class Exercise {
     this.imageUrl,
   });
 
-  factory Exercise.fromJson(Map<String, dynamic> json, String id) {
-    return Exercise(
-      id: id,
-      name: json['name'],
-      exerciseTime: json['exerciseTime'],
-      restTime: json['restTime'],
-      description: json['description'],
-      imageUrl: json['imageUrl'],
-    );
-  }
-
   Map<String, dynamic> toJson() {
+    // id is not included in the JSON as it is either auto-generated or provided in the function it's used in
     return {
       'name': name,
       'exerciseTime': exerciseTime,
@@ -40,6 +30,13 @@ class Exercise {
 
   factory Exercise.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Exercise.fromJson(data, doc.id);
+    return Exercise(
+      id: doc.id,
+      name: data['name'],
+      exerciseTime: data['exerciseTime'],
+      restTime: data['restTime'],
+      description: data['description'],
+      imageUrl: data['imageUrl'],
+    );
   }
 }

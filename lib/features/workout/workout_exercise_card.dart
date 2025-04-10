@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 
 class WorkoutExerciseCard extends StatelessWidget {
   final Exercise exercise;
-  const WorkoutExerciseCard({super.key, required this.exercise});
+  final Function() onMoreOptionsPressed;
+  const WorkoutExerciseCard({
+    super.key,
+    required this.exercise,
+    required this.onMoreOptionsPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +62,7 @@ class WorkoutExerciseCard extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // TODO: Implement menu logic
-              print('Menu button pressed for ${exercise.name}');
-            },
+            onPressed: onMoreOptionsPressed,
           ),
         ],
       ),

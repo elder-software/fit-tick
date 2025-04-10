@@ -22,6 +22,8 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     on<InitialEvent>(_onInitialEvent);
     on<UpdateWorkout>(_onUpdateWorkout);
     on<DeleteWorkout>(_onDeleteWorkout);
+    on<DeleteExercise>(_onDeleteExercise);
+    on<LoadExercises>(_onLoadExercises);
   }
 
   void _onLoadScreen(LoadScreen event, Emitter<WorkoutState> emit) async {
@@ -30,7 +32,13 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
       final exercises = await _exerciseRepo.allExercisesForWorkout(
         event.workoutId,
       );
-      emit(WorkoutLoaded(workout: workout, exercises: exercises));
+      emit(
+        WorkoutLoaded(
+          workout: workout,
+          exercises: exercises,
+          exercisesLoading: false,
+        ),
+      );
     } catch (e) {
       print(e);
       emit(ErrorScreen(message: 'Error loading workout.'));
@@ -53,10 +61,11 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
           WorkoutLoaded(
             workout: event.workout,
             exercises: currentState.exercises,
+            exercisesLoading: currentState.exercisesLoading,
           ),
         );
       } else {
-        add(LoadScreen(workoutId: event.workout.id ?? ''));
+        add(LoadScreen(workoutId: event.workout.id));
       }
     } catch (e) {
       print(e);
@@ -74,6 +83,65 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     } catch (e) {
       print(e);
       emit(ErrorScreen(message: 'Error deleting workout.'));
+    }
+  }
+
+  Future<void> _onDeleteExercise(
+    DeleteExercise event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    try {
+      if (state is WorkoutLoaded) {
+        final currentState = state as WorkoutLoaded;
+        emit(
+          WorkoutLoaded(
+            workout: currentState.workout,
+            exercises: currentState.exercises,
+            exercisesLoading: true,
+          ),
+        );
+      } else {
+        add(LoadScreen(workoutId: event.workoutId));
+      }
+      await _exerciseRepo.deleteExercise(event.workoutId, event.exerciseId);
+      add(LoadScreen(workoutId: event.workoutId));
+    } catch (e) {
+      print(e);
+      emit(ErrorScreen(message: 'Error deleting exercise.'));
+    }
+  }
+
+  Future<void> _onLoadExercises(
+    LoadExercises event,
+    Emitter<WorkoutState> emit,
+  ) async {
+    if (state is WorkoutLoaded) {
+      final currentState = state as WorkoutLoaded;
+      emit(
+        WorkoutLoaded(
+          workout: currentState.workout,
+          exercises: currentState.exercises,
+          exercisesLoading: true,
+        ),
+      );
+    } else {
+      add(LoadScreen(workoutId: event.workout.id));
+      return;
+    }
+    try {
+      final exercises = await _exerciseRepo.allExercisesForWorkout(
+        event.workout.id,
+      );
+      emit(
+        WorkoutLoaded(
+          workout: event.workout,
+          exercises: exercises,
+          exercisesLoading: false,
+        ),
+      );
+    } catch (e) {
+      print(e);
+      emit(ErrorScreen(message: 'Error loading exercises.'));
     }
   }
 }
