@@ -51,7 +51,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     return BlocListener<ExerciseBloc, ExerciseState>(
       listener: (context, state) {
         if (state is ExerciseSaveSuccess) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         }
       },
       child: BlocBuilder<ExerciseBloc, ExerciseState>(
