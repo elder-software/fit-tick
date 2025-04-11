@@ -8,3 +8,9 @@ abstract class TimerEvent extends Equatable {
 }
 
 class TimerStarted extends TimerEvent {}
+
+class TimerInitialized extends TimerEvent {
+  final List<Exercise> exercises;
+
+  const TimerInitialized({required this.exercises});
+}

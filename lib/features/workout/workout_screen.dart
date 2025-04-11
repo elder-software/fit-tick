@@ -46,11 +46,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         String pageTitle;
         Widget bodyContent;
         List<Widget> pageTitleButtons = [];
+        List<Exercise> exercises = [];
         final workoutBloc = context.read<WorkoutBloc>();
 
         if (state is WorkoutLoaded) {
           final workout = state.workout;
           pageTitle = workout.name;
+          exercises = state.exercises;
           pageTitleButtons = [
             StyledIconButton(
               icon: Icons.more_vert,
@@ -124,13 +126,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           pageTitle: pageTitle,
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (BuildContext sheetContext) {
-                  return buildTimerModal(context, ref);
-                },
-              );
+              Navigator.of(
+                context,
+              ).pushNamed('/timer', arguments: {'exercises': exercises});
             },
             child: const Icon(Icons.play_arrow),
           ),

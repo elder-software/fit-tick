@@ -58,14 +58,39 @@ class FitTickApp extends StatelessWidget {
               );
             },
           },
+          onGenerateRoute: (settings) {
+            if (settings.name == '/timer') {
+              return PageRouteBuilder(
+                settings: settings,
+                pageBuilder:
+                    (context, animation, secondaryAnimation) =>
+                        BlocProvider.value(
+                          value: ref.read(timerBlocProvider),
+                          child: const TimerScreen(),
+                        ),
+                transitionsBuilder: (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 1),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                    ),
+                    child: child,
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 300),
+              );
+            }
+            return null;
+          },
         );
       },
     );
   }
-}
-
-// Created here, so that feature directories aren't importing from each other
-Widget buildTimerModal(BuildContext context, WidgetRef ref) {
-  final timerBloc = ref.read(timerBlocProvider);
-  return BlocProvider.value(value: timerBloc, child: const TimerScreen());
 }

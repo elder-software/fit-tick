@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fit_tick_mobile/data/exercise/exercise.dart';
+import 'package:fit_tick_mobile/features/timer/timer_bloc.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -28,6 +31,14 @@ class _TimerScreenState extends State<TimerScreen>
     _wipeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.linear),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final exercises = args?['exercises'] as List<Exercise>?;
+      if (exercises != null) {
+        context.read<TimerBloc>().add(TimerInitialized(exercises: exercises));
+      }
+    });
   }
 
   @override
