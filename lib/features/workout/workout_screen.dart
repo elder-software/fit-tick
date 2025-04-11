@@ -2,7 +2,6 @@ import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:fit_tick_mobile/features/workout/workout_exercise_card.dart';
-import 'package:fit_tick_mobile/main.dart';
 import 'package:fit_tick_mobile/ui/counter.dart';
 import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
