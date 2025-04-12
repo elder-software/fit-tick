@@ -3,6 +3,7 @@ import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:fit_tick_mobile/features/workout/workout_exercise_card.dart';
 import 'package:fit_tick_mobile/ui/counter.dart';
+import 'package:fit_tick_mobile/ui/fab.dart';
 import 'package:fit_tick_mobile/ui/icon.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:flutter/material.dart';
@@ -123,6 +124,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         return FitTickStandardScreen(
           topBarTitle: 'Workout',
           pageTitle: pageTitle,
+          floatingActionButtonLocation:
+              const CenterUpFloatingActionButtonLocation(24.0),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               Navigator.of(
@@ -282,7 +285,7 @@ class WorkoutLoadedWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Exercises', style: theme.textTheme.titleMedium),
-              IconButton.filledTonal(
+              IconButton.outlined(
                 icon: const Icon(Icons.add),
                 onPressed: () async {
                   final result = await Navigator.pushNamed(
@@ -297,10 +300,6 @@ class WorkoutLoadedWidget extends StatelessWidget {
                     );
                   }
                 },
-                style: IconButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                ),
                 padding: const EdgeInsets.all(8),
               ),
             ],

@@ -43,16 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ],
-      floatingActionButtonLocation: const CenterUpFloatingActionButtonLocation(
-        24.0,
-      ),
-      floatingActionButton: StandardFloatingActionButton(
-        icon: Icons.add,
-        onPressed: () {
-          _showWorkoutNameDialog(context, null, (String name) {
-            homeBloc.add(CreateWorkout(name: name));
-          });
-        },
+      pageTitleButtons: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton.outlined(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              _showWorkoutNameDialog(context, null, (String name) {
+                homeBloc.add(CreateWorkout(name: name));
+              });
+            },
+          ),
+        ],
       ),
       children: [
         Expanded(
