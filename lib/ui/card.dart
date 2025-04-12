@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 class FitTickStandardCard extends StatelessWidget {
   final String title;
-  final String details;
+  final String? details;
   final Function() onTap;
   final Function()? onTapMore;
 
   const FitTickStandardCard({
     super.key,
     required this.title,
-    required this.details,
+    this.details,
     required this.onTap,
     this.onTapMore,
   });
@@ -50,12 +50,14 @@ class FitTickStandardCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4.0),
-                  Text(
-                    details,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  details != null
+                      ? Text(
+                        details!,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                      : const SizedBox.shrink(),
                 ],
               ),
               if (onTapMore != null)

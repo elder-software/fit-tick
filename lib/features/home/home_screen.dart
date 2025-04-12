@@ -71,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     final workout = state.workouts[index];
                     return FitTickStandardCard(
                       title: workout.name,
-                      details: workout.id,
                       onTap: () {
                         Navigator.pushNamed(
                           context,
