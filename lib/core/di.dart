@@ -6,6 +6,7 @@ import 'package:fit_tick_mobile/data/auth/auth_service.dart'; // Adjust the impo
 import 'package:fit_tick_mobile/data/workout/workout_repo.dart';
 import 'package:fit_tick_mobile/features/home/home_bloc.dart'; // Import HomeBloc
 import 'package:fit_tick_mobile/features/exercise/exercise_bloc.dart'; // Import ExerciseBloc
+import 'package:fit_tick_mobile/features/account/account_bloc.dart'; // Import AccountBloc
 
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
@@ -39,4 +40,8 @@ final exerciseBlocProvider = Provider<ExerciseBloc>((ref) {
 
 final timerBlocProvider = Provider<TimerBloc>((ref) {
   return TimerBloc();
+});
+
+final accountBlocProvider = Provider<AccountBloc>((ref) {
+  return AccountBloc(authService: ref.read(authServiceProvider));
 });

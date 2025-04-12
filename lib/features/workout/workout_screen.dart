@@ -207,7 +207,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           content: FitTickTextField(
             controller: controller,
             labelText: 'Workout Name',
-            capitalizeWords: true,
+            textCapitalization: TextCapitalization.words,
           ),
           onConfirm: () {
             String newWorkoutName = controller.text;

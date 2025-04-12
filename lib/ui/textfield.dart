@@ -6,7 +6,7 @@ class FitTickTextField extends StatelessWidget {
   final String hintText;
   final String errorText;
   final bool isPassword;
-  final bool capitalizeWords;
+  final TextCapitalization textCapitalization;
   final String? initialValue;
   const FitTickTextField({
     super.key,
@@ -16,7 +16,7 @@ class FitTickTextField extends StatelessWidget {
     this.hintText = '',
     this.errorText = '',
     this.isPassword = false,
-    this.capitalizeWords = false,
+    this.textCapitalization = TextCapitalization.sentences,
   });
 
   @override
@@ -49,10 +49,7 @@ class FitTickTextField extends StatelessWidget {
       style: TextStyle(color: colorScheme.onSurface),
       obscureText: isPassword,
       autofocus: true,
-      textCapitalization:
-          capitalizeWords
-              ? TextCapitalization.words
-              : TextCapitalization.sentences,
+      textCapitalization: textCapitalization,
     );
   }
 }

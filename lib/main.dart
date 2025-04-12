@@ -6,6 +6,7 @@ import 'package:fit_tick_mobile/core/firebase_options.dart';
 import 'package:fit_tick_mobile/features/home/home_screen.dart';
 import 'package:fit_tick_mobile/features/workout/workout_screen.dart';
 import 'package:fit_tick_mobile/features/exercise/exercise_screen.dart';
+import 'package:fit_tick_mobile/features/account/account_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'util.dart';
@@ -39,6 +40,7 @@ class FitTickApp extends StatelessWidget {
         final homeBloc = ref.watch(homeBlocProvider);
         final workoutBloc = ref.watch(workoutBlocProvider);
         final exerciseBloc = ref.watch(exerciseBlocProvider);
+        final accountBloc = ref.watch(accountBlocProvider);
 
         return MaterialApp(
           title: 'FitTick',
@@ -55,6 +57,12 @@ class FitTickApp extends StatelessWidget {
               return BlocProvider.value(
                 value: exerciseBloc,
                 child: const ExerciseScreen(),
+              );
+            },
+            '/account': (context) {
+              return BlocProvider.value(
+                value: accountBloc,
+                child: const AccountScreen(),
               );
             },
           },

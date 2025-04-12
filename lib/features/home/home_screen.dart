@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           icon: const Icon(Icons.account_circle_outlined),
           onPressed: () {
-            // TODO: Implement account action
+            Navigator.pushNamed(context, '/account');
           },
         ),
       ],
@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Workout Name',
           content: FitTickTextField(
             controller: controller,
-            capitalizeWords: true,
+            textCapitalization: TextCapitalization.words,
           ),
           onConfirm: () {
             String workoutName = controller.text;
