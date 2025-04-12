@@ -83,8 +83,9 @@ class AuthService {
   Future<void> logOut() async {
     try {
       await _auth.signOut();
+      await signInAnonymously();
     } catch (e) {
-      print('Failed to log out: ${e.toString()}');
+      print('Failed to log out or sign back in anonymously: ${e.toString()}');
     }
   }
 }

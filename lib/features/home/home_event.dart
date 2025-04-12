@@ -27,6 +27,13 @@ class _WorkoutsUpdated extends HomeEvent {
   List<Object> get props => [workouts];
 }
 
+class _LoadWorkoutsFailed extends HomeEvent {
+  final Object error;
+  const _LoadWorkoutsFailed(this.error);
+  @override
+  List<Object> get props => [error];
+}
+
 class DeleteWorkout extends HomeEvent {
   final String workoutId;
 
@@ -40,4 +47,7 @@ class UpdateWorkout extends HomeEvent {
   final Workout workout;
 
   const UpdateWorkout({required this.workout});
+
+  @override
+  List<Object> get props => [workout];
 }

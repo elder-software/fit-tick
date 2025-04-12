@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/data/auth/auth_service.dart';
 import 'package:fit_tick_mobile/data/workout/workout_repo.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -22,15 +23,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<CreateWorkout>(_onCreateWorkout);
     on<DeleteWorkout>(_onDeleteWorkout);
     on<UpdateWorkout>(_onUpdateWorkout);
+    on<_LoadWorkoutsFailed>(_onLoadWorkoutsFailed);
   }
 
   void _onLoadWorkouts(LoadWorkouts event, Emitter<HomeState> emit) {
-    final userId = _authService.currentUser?.uid;
-    if (userId == null) {
-      emit(const HomeError(message: 'User not authenticated'));
+    final user = _authService.currentUser;
+
+    if (user == null || user.isAnonymous) {
+      _workoutSubscription?.cancel();
+      _workoutSubscription = null;
+      emit(const HomeLoaded(workouts: []));
       return;
     }
 
+    final userId = user.uid;
     emit(HomeLoading());
     _workoutSubscription?.cancel();
     _workoutSubscription = _workoutRepo
@@ -40,13 +46,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             add(_WorkoutsUpdated(workouts));
           },
           onError: (error) {
-            emit(HomeError(message: error.toString()));
+            add(_LoadWorkoutsFailed(error));
           },
         );
   }
 
   void _onWorkoutsUpdated(_WorkoutsUpdated event, Emitter<HomeState> emit) {
     emit(HomeLoaded(workouts: event.workouts));
+  }
+
+  void _onLoadWorkoutsFailed(
+    _LoadWorkoutsFailed event,
+    Emitter<HomeState> emit,
+  ) {
+    print('Error loading workouts: ${event.error}');
+    emit(
+      HomeError(message: 'Failed to load workouts: ${event.error.toString()}'),
+    );
   }
 
   Future<void> _onCreateWorkout(
@@ -56,13 +72,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       final userId = _authService.currentUser?.uid;
       if (userId == null) {
-        emit(const HomeError(message: 'Error creating workout'));
+        emit(HomeError(message: 'Cannot create workout: User not logged in'));
         return;
       }
       final workout = Workout(id: '', userId: userId, name: event.name);
       await _workoutRepo.createWorkout(workout);
     } catch (e) {
-      emit(HomeError(message: e.toString()));
+      emit(HomeError(message: 'Failed to create workout: ${e.toString()}'));
     }
   }
 
@@ -73,7 +89,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       await _workoutRepo.deleteWorkout(event.workoutId);
     } catch (e) {
-      emit(HomeError(message: e.toString()));
+      emit(HomeError(message: 'Failed to delete workout: ${e.toString()}'));
     }
   }
 
@@ -84,7 +100,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       await _workoutRepo.updateWorkout(event.workout);
     } catch (e) {
-      emit(HomeError(message: e.toString()));
+      emit(HomeError(message: 'Failed to update workout: ${e.toString()}'));
     }
   }
 
