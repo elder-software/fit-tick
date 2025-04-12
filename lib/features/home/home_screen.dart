@@ -29,12 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return FitTickStandardScreen(
       topBarTitle: 'Home',
       pageTitle: 'Workouts',
-      leading: IconButton(
-        icon: const Icon(Icons.menu),
-        onPressed: () {
-          // TODO: Implement drawer or menu action
-        },
-      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.account_circle_outlined),
