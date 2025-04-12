@@ -39,7 +39,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     if (state is TimerStandard) {
       final currentState = state as TimerStandard;
       final newIndex = currentState.currentExerciseIndex + 1;
-      if (newIndex < event.exercises.length) {
+      if (newIndex < currentState.exercises.length) {
         emit(
           TimerStandard(
             exercises: currentState.exercises,
@@ -62,8 +62,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       if (newIndex >= 0) {
         emit(
           TimerStandard(
-            exercises: event.exercises,
-            currentExercise: event.exercises[newIndex],
+            exercises: currentState.exercises,
+            currentExercise: currentState.exercises[newIndex],
             currentExerciseIndex: newIndex,
             isRunning: false,
           ),

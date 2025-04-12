@@ -25,21 +25,6 @@ class TimerInitialized extends TimerEvent {
   const TimerInitialized({required this.exercises});
 }
 
-class TimerNextExercise extends TimerEvent {
-  final List<Exercise> exercises;
+class TimerNextExercise extends TimerEvent {}
 
-  const TimerNextExercise({required this.exercises});
-
-  @override
-  List<Object> get props => [exercises];
-}
-
-class TimerPreviousExercise extends TimerEvent {
-  final List<Exercise> exercises;
-  final int currentExerciseIndex;
-
-  const TimerPreviousExercise({
-    required this.exercises,
-    required this.currentExerciseIndex,
-  });
-}
+class TimerPreviousExercise extends TimerEvent {}

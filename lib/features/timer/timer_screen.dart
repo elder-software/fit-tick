@@ -15,17 +15,29 @@ class TimerScreen extends StatefulWidget {
 class _TimerScreenState extends State<TimerScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _wipeAnimation;
   Timer? _timer;
   bool _isRunning = false;
+  bool _isRestPhase = false;
+  int _currentDuration = 0;
+
+  bool _isTransitioningFromRest = false;
+
+  // Flag to prevent auto-start on initial load
+  bool _isInitialLoad = true;
+
+  late Color _currentBackgroundColor;
+  late Color _currentForegroundColor;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this);
-    _wipeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.linear),
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
     );
+    _currentBackgroundColor = Colors.transparent;
+    _currentForegroundColor = Colors.transparent;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -39,6 +51,7 @@ class _TimerScreenState extends State<TimerScreen>
   @override
   void dispose() {
     _animationController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -51,53 +64,135 @@ class _TimerScreenState extends State<TimerScreen>
 
   void _toggleTimer() {
     if (_isRunning) {
-      _animationController.stop();
+      _pauseTimer();
     } else {
-      _animationController.forward();
-
-      _timer?.cancel();
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_animationController.duration!.inSeconds > 0) {
-          if (mounted) {
-            setState(() {
-              _animationController.duration =
-                  _animationController.duration! - const Duration(seconds: 1);
-            });
-          } else {
-            timer.cancel();
-          }
-        } else {
-          timer.cancel();
-          _animationController.stop();
-          if (mounted) {
-            setState(() {
-              _isRunning = false;
-            });
-          }
-        }
-      });
+      _startTimer();
     }
-    if (mounted) {
-      setState(() {
-        _isRunning = !_isRunning;
-      });
+
+    setState(() {
+      _isRunning = !_isRunning;
+    });
+  }
+
+  void _startTimer() {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+
+    _updateColors();
+
+    _animationController.duration = Duration(seconds: _currentDuration);
+    _animationController.reset();
+    _animationController.forward();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_currentDuration > 0) {
+        setState(() {
+          _currentDuration--;
+        });
+      } else {
+        _timer?.cancel();
+        _handleTimerComplete();
+      }
+    });
+  }
+
+  void _pauseTimer() {
+    _timer?.cancel();
+    _animationController.stop();
+  }
+
+  void _updateColors() {
+    // Only update colors if we're not transitioning from rest to next exercise
+    if (_isTransitioningFromRest) return;
+
+    final theme = Theme.of(context);
+    if (_isRestPhase) {
+      _currentBackgroundColor = theme.colorScheme.primary;
+      _currentForegroundColor = theme.colorScheme.secondary;
+    } else {
+      _currentBackgroundColor = theme.colorScheme.secondary;
+      _currentForegroundColor = theme.colorScheme.primary;
     }
   }
 
-  void _skipPrevious() {}
-  void _skipNext() {}
+  void _handleTimerComplete() {
+    setState(() {
+      _isRunning = false;
+    });
+
+    if (_isRestPhase) {
+      _isTransitioningFromRest = true;
+      _isRestPhase = false;
+      context.read<TimerBloc>().add(TimerNextExercise());
+    } else {
+      final currentState = context.read<TimerBloc>().state;
+      if (currentState is TimerStandard &&
+          currentState.currentExercise.restTime != null) {
+        setState(() {
+          _isRestPhase = true;
+          _currentDuration = currentState.currentExercise.restTime!;
+        });
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _toggleTimer();
+          }
+        });
+      } else {
+        context.read<TimerBloc>().add(TimerNextExercise());
+      }
+    }
+  }
+
+  void _skipPrevious() {
+    _timer?.cancel();
+    setState(() {
+      _isRunning = false;
+      _isRestPhase = false;
+      _isTransitioningFromRest = false;
+    });
+    context.read<TimerBloc>().add(TimerPreviousExercise());
+  }
+
+  void _skipNext() {
+    _timer?.cancel();
+    setState(() {
+      _isRunning = false;
+      _isRestPhase = false;
+      _isTransitioningFromRest = false;
+    });
+    context.read<TimerBloc>().add(TimerNextExercise());
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
+    if (_currentBackgroundColor == Colors.transparent) {
+      _updateColors();
+    }
+
     return BlocListener<TimerBloc, TimerState>(
       listener: (context, state) {
         if (state is TimerStandard) {
-          _animationController.duration = Duration(
-            seconds: state.currentExercise.exerciseTime!,
-          );
+          setState(() {
+            _isRestPhase = false;
+            _currentDuration = state.currentExercise.exerciseTime ?? 0;
+            if (!_isTransitioningFromRest) {
+              _updateColors();
+            } else {
+              _isTransitioningFromRest = false;
+            }
+          });
+
+          if (!_isInitialLoad && _isRunning == false) {
+            _toggleTimer();
+          } else if (_isInitialLoad) {
+            // Reset the flag after the first load
+            _isInitialLoad = false;
+          }
         }
       },
       child: BlocBuilder<TimerBloc, TimerState>(
@@ -105,20 +200,21 @@ class _TimerScreenState extends State<TimerScreen>
           if (state is TimerStandard) {
             return Stack(
               children: [
-                Container(color: theme.colorScheme.secondary),
+                Container(color: _currentBackgroundColor),
                 AnimatedBuilder(
-                  animation: _wipeAnimation,
+                  animation: _animationController,
                   builder: (context, child) {
                     return ClipRect(
                       child: Align(
                         alignment: Alignment.topCenter,
-                        heightFactor: _wipeAnimation.value,
+                        heightFactor: _animationController.value,
                         child: child,
                       ),
                     );
                   },
-                  child: Container(color: theme.colorScheme.primary),
+                  child: Container(color: _currentForegroundColor),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24.0,
@@ -150,7 +246,7 @@ class _TimerScreenState extends State<TimerScreen>
                       ),
                       const SizedBox(height: 40),
                       Text(
-                        state.currentExercise.name,
+                        _isRestPhase ? "Rest" : state.currentExercise.name,
                         style: textTheme.displayMedium?.copyWith(
                           color: theme.colorScheme.onPrimary,
                         ),
@@ -158,7 +254,9 @@ class _TimerScreenState extends State<TimerScreen>
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Ensure back leg is straight\nTry not to tilt the pelvis forward',
+                        _isRestPhase
+                            ? 'Get ready for the next exercise'
+                            : 'Ensure back leg is straight\nTry not to tilt the pelvis forward',
                         style: textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onPrimary,
                         ),
@@ -166,9 +264,7 @@ class _TimerScreenState extends State<TimerScreen>
                       ),
                       const Spacer(),
                       Text(
-                        _formatDuration(
-                          _animationController.duration ?? Duration(seconds: 0),
-                        ),
+                        _formatDuration(Duration(seconds: _currentDuration)),
                         style: textTheme.displayLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.onPrimary,
