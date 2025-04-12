@@ -9,13 +9,24 @@ abstract class TimerState extends Equatable {
 
 class TimerInitial extends TimerState {}
 
-class TimerRunning extends TimerState {}
-
-class TimerReady extends TimerState {
+class TimerStandard extends TimerState {
   final List<Exercise> exercises;
+  final Exercise currentExercise;
+  final int currentExerciseIndex;
+  final bool isRunning;
 
-  const TimerReady({required this.exercises});
+  const TimerStandard({
+    required this.exercises,
+    required this.currentExercise,
+    required this.currentExerciseIndex,
+    required this.isRunning,
+  });
 
   @override
-  List<Object> get props => [exercises];
+  List<Object> get props => [
+    currentExercise,
+    currentExerciseIndex,
+    isRunning,
+    exercises,
+  ];
 }

@@ -7,10 +7,39 @@ abstract class TimerEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class TimerStarted extends TimerEvent {}
+class TimerStarted extends TimerEvent {
+  final List<Exercise> exercises;
+  final int currentExerciseIndex;
+  final int currentExerciseDuration;
+
+  const TimerStarted({
+    required this.exercises,
+    required this.currentExerciseIndex,
+    required this.currentExerciseDuration,
+  });
+}
 
 class TimerInitialized extends TimerEvent {
   final List<Exercise> exercises;
 
   const TimerInitialized({required this.exercises});
+}
+
+class TimerNextExercise extends TimerEvent {
+  final List<Exercise> exercises;
+
+  const TimerNextExercise({required this.exercises});
+
+  @override
+  List<Object> get props => [exercises];
+}
+
+class TimerPreviousExercise extends TimerEvent {
+  final List<Exercise> exercises;
+  final int currentExerciseIndex;
+
+  const TimerPreviousExercise({
+    required this.exercises,
+    required this.currentExerciseIndex,
+  });
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fit_tick_mobile/features/timer/timer_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
@@ -16,18 +17,12 @@ class _TimerScreenState extends State<TimerScreen>
   late AnimationController _animationController;
   late Animation<double> _wipeAnimation;
   Timer? _timer;
-  final Duration _totalDuration = const Duration(seconds: 30);
-  late Duration _remainingDuration;
   bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
-    _remainingDuration = _totalDuration;
-    _animationController = AnimationController(
-      vsync: this,
-      duration: _totalDuration,
-    );
+    _animationController = AnimationController(vsync: this);
     _wipeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.linear),
     );
@@ -44,7 +39,6 @@ class _TimerScreenState extends State<TimerScreen>
   @override
   void dispose() {
     _animationController.dispose();
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -57,25 +51,17 @@ class _TimerScreenState extends State<TimerScreen>
 
   void _toggleTimer() {
     if (_isRunning) {
-      _timer?.cancel();
       _animationController.stop();
     } else {
-      if (_animationController.value == 0.0 &&
-              _remainingDuration == Duration.zero ||
-          _remainingDuration == _totalDuration) {
-        _remainingDuration = _totalDuration;
-        _animationController.reset();
-      }
-
       _animationController.forward();
 
       _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_remainingDuration.inSeconds > 0) {
+        if (_animationController.duration!.inSeconds > 0) {
           if (mounted) {
             setState(() {
-              _remainingDuration =
-                  _remainingDuration - const Duration(seconds: 1);
+              _animationController.duration =
+                  _animationController.duration! - const Duration(seconds: 1);
             });
           } else {
             timer.cancel();
@@ -106,161 +92,109 @@ class _TimerScreenState extends State<TimerScreen>
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Stack(
-      children: [
-        Container(color: theme.colorScheme.secondary),
-        AnimatedBuilder(
-          animation: _wipeAnimation,
-          builder: (context, child) {
-            return ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: _wipeAnimation.value,
-                child: child,
-              ),
-            );
-          },
-          child: Container(color: theme.colorScheme.primary),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 64),
-                  child: IconButton.outlined(
-                    icon: Icon(Icons.close, color: theme.colorScheme.onSurface),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: IconButton.styleFrom(
-                      side: BorderSide(color: theme.colorScheme.onSurface),
-                      backgroundColor: theme.colorScheme.surface,
-                    ),
+    return BlocListener<TimerBloc, TimerState>(
+      listener: (context, state) {
+        if (state is TimerStandard) {
+          _animationController.duration = Duration(
+            seconds: state.currentExercise.exerciseTime!,
+          );
+        }
+      },
+      child: BlocBuilder<TimerBloc, TimerState>(
+        builder: (context, state) {
+          if (state is TimerStandard) {
+            return Stack(
+              children: [
+                Container(color: theme.colorScheme.secondary),
+                AnimatedBuilder(
+                  animation: _wipeAnimation,
+                  builder: (context, child) {
+                    return ClipRect(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        heightFactor: _wipeAnimation.value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(color: theme.colorScheme.primary),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 0,
                   ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              Text(
-                'Calve Stretch',
-                style: textTheme.displayMedium?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Ensure back leg is straight\nTry not to tilt the pelvis forward',
-                style: textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-              Text(
-                _formatDuration(_remainingDuration),
-                style: textTheme.displayLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-              const Spacer(),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 32.0),
-                  child: TimerControls(
-                    isRunning: _isRunning,
-                    onPauseToggle: _toggleTimer,
-                    onSkipPrevious: _skipPrevious,
-                    onSkipNext: _skipNext,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 64),
+                          child: IconButton.outlined(
+                            icon: Icon(
+                              Icons.close,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: IconButton.styleFrom(
+                              side: BorderSide(
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              backgroundColor: theme.colorScheme.surface,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      Text(
+                        state.currentExercise.name,
+                        style: textTheme.displayMedium?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Ensure back leg is straight\nTry not to tilt the pelvis forward',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Spacer(),
+                      Text(
+                        _formatDuration(
+                          _animationController.duration ?? Duration(seconds: 0),
+                        ),
+                        style: textTheme.displayLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 32.0),
+                          child: TimerControls(
+                            isRunning: _isRunning,
+                            onPauseToggle: _toggleTimer,
+                            onSkipPrevious: _skipPrevious,
+                            onSkipNext: _skipNext,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class TimerControls extends StatelessWidget {
-  const TimerControls({
-    super.key,
-    required this.onSkipPrevious,
-    required this.onPauseToggle,
-    required this.onSkipNext,
-    required this.isRunning,
-  });
-
-  final VoidCallback onSkipPrevious;
-  final VoidCallback onPauseToggle;
-  final VoidCallback onSkipNext;
-  final bool isRunning;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final iconColor = theme.colorScheme.onSurface;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(50.0),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.skip_previous, color: iconColor),
-            iconSize: 28.0,
-            onPressed: onSkipPrevious,
-            tooltip: 'Skip Previous',
-          ),
-          const SizedBox(width: 10),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.shadow,
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
                 ),
               ],
-            ),
-            child: IconButton(
-              icon: Icon(
-                isRunning ? Icons.pause : Icons.play_arrow,
-                color: iconColor,
-              ),
-              iconSize: 36.0,
-              onPressed: onPauseToggle,
-              tooltip: isRunning ? 'Pause' : 'Play',
-            ),
-          ),
-          const SizedBox(width: 10),
-          IconButton(
-            icon: Icon(Icons.skip_next, color: iconColor),
-            iconSize: 28.0,
-            onPressed: onSkipNext,
-            tooltip: 'Skip Next',
-          ),
-        ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
