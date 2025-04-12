@@ -1,4 +1,3 @@
-import 'package:fit_tick_mobile/ui/fab.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:fit_tick_mobile/ui/textfield.dart';
 import 'package:flutter/material.dart';
