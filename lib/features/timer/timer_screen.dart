@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/features/timer/timer_bloc.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -19,6 +20,7 @@ class _TimerScreenState extends State<TimerScreen>
   bool _isRunning = false;
   bool _isRestPhase = false;
   int _currentDuration = 0;
+  late FlutterTts flutterTts;
 
   bool _isTransitioningFromRest = false;
 
@@ -37,6 +39,8 @@ class _TimerScreenState extends State<TimerScreen>
     );
     _currentBackgroundColor = Colors.transparent;
     _currentForegroundColor = Colors.transparent;
+    flutterTts = FlutterTts();
+    _setupTts();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TimerBloc>().add(TimerReset());
@@ -50,10 +54,22 @@ class _TimerScreenState extends State<TimerScreen>
     });
   }
 
+  Future<void> _setupTts() async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
     _timer?.cancel();
+    flutterTts.stop();
     super.dispose();
   }
 
@@ -68,6 +84,10 @@ class _TimerScreenState extends State<TimerScreen>
     if (_isRunning) {
       _pauseTimer();
     } else {
+      final currentState = context.read<TimerBloc>().state;
+      if (currentState is TimerStandard) {
+        _speak(_isRestPhase ? "Rest" : currentState.currentExercise.name);
+      }
       _startTimer();
     }
 
@@ -105,7 +125,6 @@ class _TimerScreenState extends State<TimerScreen>
   }
 
   void _updateColors() {
-    // Only update colors if we're not transitioning from rest to next exercise
     if (_isTransitioningFromRest) return;
 
     final theme = Theme.of(context);
@@ -138,6 +157,7 @@ class _TimerScreenState extends State<TimerScreen>
 
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
+            _speak("Rest");
             _toggleTimer();
           }
         });
@@ -189,7 +209,14 @@ class _TimerScreenState extends State<TimerScreen>
             }
           });
 
-          if (!_isInitialLoad && _isRunning == false) {
+          // Speak the exercise name when it starts (and not initial load)
+          if (!_isInitialLoad && !_isRestPhase) {
+            _speak(state.currentExercise.name);
+          }
+
+          // Auto-start timer if not initial load and not currently running
+          if (!_isInitialLoad && !_isRunning) {
+            _speak(_isRestPhase ? "Rest" : state.currentExercise.name);
             _toggleTimer();
           } else if (_isInitialLoad) {
             // Reset the flag after the first load
@@ -258,7 +285,7 @@ class _TimerScreenState extends State<TimerScreen>
                       Text(
                         _isRestPhase
                             ? 'Get ready for the next exercise'
-                            : 'Ensure back leg is straight\nTry not to tilt the pelvis forward',
+                            : state.currentExercise.description ?? '',
                         style: textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onPrimary,
                         ),
