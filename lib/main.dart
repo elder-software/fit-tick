@@ -9,8 +9,8 @@ import 'package:fit_tick_mobile/features/exercise/exercise_screen.dart';
 import 'package:fit_tick_mobile/features/account/account_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'util.dart';
-import 'theme.dart';
+import 'ui/theme/text_helper.dart';
+import 'ui/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
