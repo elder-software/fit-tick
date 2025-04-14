@@ -20,6 +20,9 @@ class WorkoutScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
+  int _roundAmount = 1; // Default to 1 round
+  int _roundRest = 0; // Default to 60 seconds rest
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +86,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             workout: workout,
             exercises: state.exercises,
             exercisesLoading: state.exercisesLoading,
+            onRoundAmountChanged: (value) {
+              setState(() {
+                _roundAmount = value;
+              });
+            },
+            onRoundRestChanged: (value) {
+              setState(() {
+                _roundRest = value;
+              });
+            },
             onMoreOptionsPressed: (exercise) {
               _showEditDeleteBottomSheet(
                 context,
@@ -128,9 +141,23 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               const CenterUpFloatingActionButtonLocation(24.0),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
+              var finalExercises = <Exercise>[];
+              final roundBreakExercise = Exercise(
+                id: 'round-break',
+                name: 'Round Break',
+                exerciseTime: 3, // Consider if this should be configurable too
+                restTime: _roundRest,
+              );
+              for (var i = 0; i < _roundAmount; i++) {
+                finalExercises.addAll(exercises);
+                if (i < _roundAmount - 1) {
+                  finalExercises.add(roundBreakExercise);
+                }
+              }
+
               Navigator.of(
                 context,
-              ).pushNamed('/timer', arguments: {'exercises': exercises});
+              ).pushNamed('/timer', arguments: {'exercises': finalExercises});
             },
             child: const Icon(Icons.play_arrow),
           ),
@@ -251,12 +278,17 @@ class WorkoutLoadedWidget extends StatelessWidget {
   final List<Exercise> exercises;
   final bool exercisesLoading;
   final Function(Exercise) onMoreOptionsPressed;
+  final Function(int) onRoundAmountChanged;
+  final Function(int) onRoundRestChanged;
+
   const WorkoutLoadedWidget({
     super.key,
     required this.workout,
     required this.exercises,
     required this.exercisesLoading,
     required this.onMoreOptionsPressed,
+    required this.onRoundAmountChanged,
+    required this.onRoundRestChanged,
   });
 
   @override
@@ -272,8 +304,14 @@ class WorkoutLoadedWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Counter(label: 'Amount', onChanged: (value) => print(value)),
-              Counter(label: 'Rest', onChanged: (value) => print(value)),
+              Counter(
+                label: 'Amount',
+                onChanged: (value) => onRoundAmountChanged(value),
+              ),
+              Counter(
+                label: 'Rest',
+                onChanged: (value) => onRoundRestChanged(value),
+              ),
             ],
           ),
         ),
