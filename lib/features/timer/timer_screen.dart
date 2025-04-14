@@ -39,6 +39,8 @@ class _TimerScreenState extends State<TimerScreen>
     _currentForegroundColor = Colors.transparent;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TimerBloc>().add(TimerReset());
+
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       final exercises = args?['exercises'] as List<Exercise>?;

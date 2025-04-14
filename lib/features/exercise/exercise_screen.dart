@@ -56,6 +56,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         if (state is ExerciseLoaded && state.exercise != null) {
           _nameController.text = state.exercise!.name;
           _descriptionController.text = state.exercise!.description ?? '';
+          _exerciseTimeController = state.exercise!.exerciseTime ?? 0;
+          _restTimeController = state.exercise!.restTime ?? 0;
         }
       },
       child: BlocBuilder<ExerciseBloc, ExerciseState>(

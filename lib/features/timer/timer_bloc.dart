@@ -11,6 +11,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<TimerInitialized>(_onTimerInitialized);
     on<TimerNextExercise>(_onTimerNextExercise);
     on<TimerPreviousExercise>(_onTimerPreviousExercise);
+    on<TimerReset>(_onTimerReset);
   }
 
   void _onTimerStarted(TimerStarted event, Emitter<TimerState> emit) {
@@ -70,5 +71,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         );
       }
     }
+  }
+
+  void _onTimerReset(TimerReset event, Emitter<TimerState> emit) {
+    emit(TimerInitial());
   }
 }

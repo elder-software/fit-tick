@@ -29,7 +29,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   void _onLoadWorkouts(LoadWorkouts event, Emitter<HomeState> emit) {
     final user = _authService.currentUser;
 
-    if (user == null || user.isAnonymous) {
+    if (user == null) {
       _workoutSubscription?.cancel();
       _workoutSubscription = null;
       emit(const HomeLoaded(workouts: []));
