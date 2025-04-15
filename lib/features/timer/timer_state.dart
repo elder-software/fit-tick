@@ -10,8 +10,8 @@ abstract class TimerState extends Equatable {
 class TimerInitial extends TimerState {}
 
 class TimerStandard extends TimerState {
-  final List<Exercise> exercises;
-  final Exercise currentExercise;
+  final List<TimerExercise> exercises;
+  final TimerExercise currentExercise;
   final int currentExerciseIndex;
   final bool isRunning;
 

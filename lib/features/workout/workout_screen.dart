@@ -1,4 +1,5 @@
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
+import 'package:fit_tick_mobile/data/timer/timer_exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:fit_tick_mobile/features/workout/workout_exercise_card.dart';
@@ -141,23 +142,15 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               const CenterUpFloatingActionButtonLocation(24.0),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              var finalExercises = <Exercise>[];
-              final roundBreakExercise = Exercise(
-                id: 'round-break',
-                name: 'Round Break',
-                exerciseTime: 3, // Consider if this should be configurable too
-                restTime: _roundRest,
+              final timerExercises = buildTimerExercises(
+                exercises,
+                _roundAmount,
+                _roundRest,
               );
-              for (var i = 0; i < _roundAmount; i++) {
-                finalExercises.addAll(exercises);
-                if (i < _roundAmount - 1) {
-                  finalExercises.add(roundBreakExercise);
-                }
-              }
 
               Navigator.of(
                 context,
-              ).pushNamed('/timer', arguments: {'exercises': finalExercises});
+              ).pushNamed('/timer', arguments: {'exercises': timerExercises});
             },
             child: const Icon(Icons.play_arrow),
           ),

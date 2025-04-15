@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'package:fit_tick_mobile/data/timer/timer_exercise.dart';
 import 'package:fit_tick_mobile/features/timer/timer_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fit_tick_mobile/data/exercise/exercise.dart';
 import 'package:fit_tick_mobile/features/timer/timer_bloc.dart';
 import 'package:fit_tick_mobile/core/tts_service.dart';
 
@@ -18,13 +18,9 @@ class _TimerScreenState extends State<TimerScreen>
   late AnimationController _animationController;
   Timer? _timer;
   bool _isRunning = false;
-  bool _isRestPhase = false;
   int _currentDuration = 0;
   late TtsService _ttsService;
 
-  bool _isTransitioningFromRest = false;
-
-  // Flag to prevent auto-start on initial load
   bool _isInitialLoad = true;
 
   late Color _currentBackgroundColor;
@@ -37,17 +33,21 @@ class _TimerScreenState extends State<TimerScreen>
       vsync: this,
       duration: const Duration(seconds: 1),
     );
-    _currentBackgroundColor = Colors.transparent;
     _currentForegroundColor = Colors.transparent;
     _ttsService = TtsService();
     _ttsService.initialize();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final theme = Theme.of(context);
+      setState(() {
+        _currentForegroundColor = theme.colorScheme.secondary;
+      });
+
       context.read<TimerBloc>().add(TimerReset());
 
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final exercises = args?['exercises'] as List<Exercise>?;
+      final exercises = args?['exercises'] as List<TimerExercise>?;
       if (exercises != null) {
         context.read<TimerBloc>().add(TimerInitialized(exercises: exercises));
       }
@@ -70,14 +70,15 @@ class _TimerScreenState extends State<TimerScreen>
   }
 
   void _toggleTimer() {
+    final currentState = context.read<TimerBloc>().state;
+
     if (_isRunning) {
       _pauseTimer();
     } else {
-      final currentState = context.read<TimerBloc>().state;
       if (currentState is TimerStandard) {
-        _ttsService.speak(_isRestPhase ? "Rest" : currentState.currentExercise.name);
+        _ttsService.speak(currentState.currentExercise.name);
+        _startTimer(currentState.currentExercise);
       }
-      _startTimer();
     }
 
     setState(() {
@@ -85,14 +86,12 @@ class _TimerScreenState extends State<TimerScreen>
     });
   }
 
-  void _startTimer() {
+  void _startTimer(TimerExercise timerExercise) {
     if (_timer != null) {
       _timer!.cancel();
     }
 
-    _updateColors();
-
-    _animationController.duration = Duration(seconds: _currentDuration);
+    _animationController.duration = Duration(seconds: timerExercise.time);
     _animationController.reset();
     _animationController.forward();
 
@@ -113,17 +112,14 @@ class _TimerScreenState extends State<TimerScreen>
     _animationController.stop();
   }
 
-  void _updateColors() {
-    if (_isTransitioningFromRest) return;
-
+  void _updateColors(TimerExercise timerExercise) {
     final theme = Theme.of(context);
-    if (_isRestPhase) {
-      _currentBackgroundColor = theme.colorScheme.primary;
-      _currentForegroundColor = theme.colorScheme.secondary;
-    } else {
-      _currentBackgroundColor = theme.colorScheme.secondary;
-      _currentForegroundColor = theme.colorScheme.primary;
-    }
+    _currentBackgroundColor = _currentForegroundColor;
+    _currentForegroundColor = switch (timerExercise.type) {
+      TimerExerciseType.rest => theme.colorScheme.secondary,
+      TimerExerciseType.exercise => theme.colorScheme.primary,
+      TimerExerciseType.roundRest => theme.colorScheme.tertiaryFixedDim,
+    };
   }
 
   void _handleTimerComplete() {
@@ -131,36 +127,13 @@ class _TimerScreenState extends State<TimerScreen>
       _isRunning = false;
     });
 
-    if (_isRestPhase) {
-      _isTransitioningFromRest = true;
-      _isRestPhase = false;
-      context.read<TimerBloc>().add(TimerNextExercise());
-    } else {
-      final currentState = context.read<TimerBloc>().state;
-      if (currentState is TimerStandard &&
-          currentState.currentExercise.restTime != null) {
-        setState(() {
-          _isRestPhase = true;
-          _currentDuration = currentState.currentExercise.restTime!;
-        });
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _toggleTimer();
-          }
-        });
-      } else {
-        context.read<TimerBloc>().add(TimerNextExercise());
-      }
-    }
+    context.read<TimerBloc>().add(TimerNextExercise());
   }
 
   void _skipPrevious() {
     _timer?.cancel();
     setState(() {
       _isRunning = false;
-      _isRestPhase = false;
-      _isTransitioningFromRest = false;
     });
     context.read<TimerBloc>().add(TimerPreviousExercise());
   }
@@ -169,8 +142,6 @@ class _TimerScreenState extends State<TimerScreen>
     _timer?.cancel();
     setState(() {
       _isRunning = false;
-      _isRestPhase = false;
-      _isTransitioningFromRest = false;
     });
     context.read<TimerBloc>().add(TimerNextExercise());
   }
@@ -180,28 +151,17 @@ class _TimerScreenState extends State<TimerScreen>
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    if (_currentBackgroundColor == Colors.transparent) {
-      _updateColors();
-    }
-
     return BlocListener<TimerBloc, TimerState>(
       listener: (context, state) {
         if (state is TimerStandard) {
+          _updateColors(state.currentExercise);
           setState(() {
-            _isRestPhase = false;
-            _currentDuration = state.currentExercise.exerciseTime ?? 0;
-            if (!_isTransitioningFromRest) {
-              _updateColors();
-            } else {
-              _isTransitioningFromRest = false;
-            }
+            _currentDuration = state.currentExercise.time;
           });
 
-          // Auto-start timer if not initial load and not currently running
           if (!_isInitialLoad && !_isRunning) {
             _toggleTimer();
           } else if (_isInitialLoad) {
-            // Reset the flag after the first load
             _isInitialLoad = false;
           }
         }
@@ -257,7 +217,7 @@ class _TimerScreenState extends State<TimerScreen>
                       ),
                       const SizedBox(height: 40),
                       Text(
-                        _isRestPhase ? "Rest" : state.currentExercise.name,
+                        state.currentExercise.name,
                         style: textTheme.displayMedium?.copyWith(
                           color: theme.colorScheme.onPrimary,
                         ),
@@ -265,9 +225,7 @@ class _TimerScreenState extends State<TimerScreen>
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _isRestPhase
-                            ? 'Get ready for the next exercise'
-                            : state.currentExercise.description ?? '',
+                        state.currentExercise.description,
                         style: textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onPrimary,
                         ),

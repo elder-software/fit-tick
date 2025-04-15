@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fit_tick_mobile/data/exercise/exercise.dart';
+import 'package:fit_tick_mobile/data/timer/timer_exercise.dart';
 
 part 'timer_event.dart';
 part 'timer_state.dart';
