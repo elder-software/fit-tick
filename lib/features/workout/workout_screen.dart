@@ -37,7 +37,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       } else {
         print("Error: workoutId is null");
         context.read<WorkoutBloc>().add(
-          WorkoutError(message: 'Could not load workout'),
+          const ShowTransientError(message: 'Could not load workout'),
         );
       }
     });
@@ -45,7 +45,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WorkoutBloc, WorkoutState>(
+    return BlocConsumer<WorkoutBloc, WorkoutState>(
+      listener: (context, state) {
+        if (state is WorkoutLoaded && state.transientErrorMessage != null) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.transientErrorMessage!)));
+        }
+      },
       builder: (context, state) {
         String pageTitle;
         Widget bodyContent;
@@ -142,8 +149,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               const CenterUpFloatingActionButtonLocation(24.0),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
+              if (state is! WorkoutLoaded) return;
+
+              if (state.exercises.isEmpty) {
+                context.read<WorkoutBloc>().add(
+                  const ShowTransientError(message: 'No exercises to start'),
+                );
+                return;
+              }
               final timerExercises = buildTimerExercises(
-                exercises,
+                state.exercises,
                 _roundAmount,
                 _roundRest,
               );

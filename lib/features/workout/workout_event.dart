@@ -17,14 +17,6 @@ class LoadScreen extends WorkoutEvent {
   List<Object> get props => [workoutId];
 }
 
-class WorkoutError extends WorkoutEvent {
-  final String message;
-  const WorkoutError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
 class UpdateWorkout extends WorkoutEvent {
   final Workout workout;
   const UpdateWorkout({required this.workout});
@@ -57,4 +49,12 @@ class LoadExercises extends WorkoutEvent {
 
   @override
   List<Object> get props => [workoutId, workout];
+}
+
+class ShowTransientError extends WorkoutEvent {
+  final String message;
+  const ShowTransientError({required this.message});
+
+  @override
+  List<Object> get props => [message];
 }

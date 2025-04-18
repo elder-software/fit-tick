@@ -24,6 +24,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     on<DeleteWorkout>(_onDeleteWorkout);
     on<DeleteExercise>(_onDeleteExercise);
     on<LoadExercises>(_onLoadExercises);
+    on<ShowTransientError>(_onShowTransientError);
   }
 
   void _onLoadScreen(LoadScreen event, Emitter<WorkoutState> emit) async {
@@ -37,6 +38,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
           workout: workout,
           exercises: exercises,
           exercisesLoading: false,
+          transientErrorMessage: null,
         ),
       );
     } catch (e) {
@@ -62,6 +64,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
             workout: event.workout,
             exercises: currentState.exercises,
             exercisesLoading: currentState.exercisesLoading,
+            transientErrorMessage: null,
           ),
         );
       } else {
@@ -98,6 +101,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
             workout: currentState.workout,
             exercises: currentState.exercises,
             exercisesLoading: true,
+            transientErrorMessage: null,
           ),
         );
       } else {
@@ -122,6 +126,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
           workout: currentState.workout,
           exercises: currentState.exercises,
           exercisesLoading: true,
+          transientErrorMessage: null,
         ),
       );
     } else {
@@ -137,11 +142,26 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
           workout: event.workout,
           exercises: exercises,
           exercisesLoading: false,
+          transientErrorMessage: null,
         ),
       );
     } catch (e) {
       print(e);
       emit(ErrorScreen(message: 'Error loading exercises.'));
+    }
+  }
+
+  void _onShowTransientError(
+    ShowTransientError event,
+    Emitter<WorkoutState> emit,
+  ) {
+    if (state is WorkoutLoaded) {
+      final currentState = state as WorkoutLoaded;
+      emit(currentState.copyWith(transientErrorMessage: event.message));
+    } else {
+      print(
+        'ShowTransientError received but state is not WorkoutLoaded. Ignoring.',
+      );
     }
   }
 }
