@@ -5,7 +5,6 @@ import 'package:fit_tick_mobile/ui/dialog.dart';
 import 'package:fit_tick_mobile/features/home/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fit_tick_mobile/ui/card.dart';
-import 'package:fit_tick_mobile/data/workout/workout.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,11 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ) {
                                   homeBloc.add(
                                     UpdateWorkout(
-                                      workout: Workout(
-                                        id: workout.id,
-                                        userId: workout.userId,
-                                        name: name,
-                                      ),
+                                      workout: workout.copyWith(name: name),
                                     ),
                                   );
                                 });

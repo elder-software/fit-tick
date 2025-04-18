@@ -34,6 +34,7 @@ class _TimerScreenState extends State<TimerScreen>
       duration: const Duration(seconds: 1),
     );
     _currentForegroundColor = Colors.transparent;
+    _currentBackgroundColor = Colors.transparent;
     _ttsService = TtsService();
     _ttsService.initialize();
 
