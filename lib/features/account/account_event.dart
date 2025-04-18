@@ -31,4 +31,10 @@ class AccountSignUpRequested extends AccountEvent {
   List<Object?> get props => [email, password];
 }
 
-class AccountLogOutRequested extends AccountEvent {} 
+class AccountLogOutRequested extends AccountEvent {}
+
+class AccountDeleteAccountRequested extends AccountEvent {
+  final String password;
+
+  const AccountDeleteAccountRequested({required this.password});
+}

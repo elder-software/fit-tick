@@ -43,5 +43,8 @@ final timerBlocProvider = Provider<TimerBloc>((ref) {
 });
 
 final accountBlocProvider = Provider<AccountBloc>((ref) {
-  return AccountBloc(authService: ref.read(authServiceProvider));
+  return AccountBloc(
+    authService: ref.read(authServiceProvider),
+    workoutRepo: ref.read(workoutRepoProvider),
+  );
 });

@@ -20,8 +20,19 @@ class WorkoutRepo {
         .where('userId', isEqualTo: userIdForQuery)
         .snapshots()
         .map((snapshot) {
-            return snapshot.docs.map((doc) => Workout.fromFirestore(doc)).toList();
+          return snapshot.docs
+              .map((doc) => Workout.fromFirestore(doc))
+              .toList();
         });
+  }
+
+  Future<List<Workout>> allWorkoutsForUserAsList(String userIdForQuery) async {
+    final workouts =
+        await FirebaseFirestore.instance
+            .collection('workouts')
+            .where('userId', isEqualTo: userIdForQuery)
+            .get();
+    return workouts.docs.map((doc) => Workout.fromFirestore(doc)).toList();
   }
 
   Future<void> updateWorkout(Workout workout) async {
@@ -33,5 +44,20 @@ class WorkoutRepo {
 
   Future<void> deleteWorkout(String workoutId) async {
     await _firestore.collection('workouts').doc(workoutId).delete();
+  }
+
+  Future<void> deleteAllWorkoutsForUser(String userId) async {
+    final WriteBatch batch = _firestore.batch();
+    final QuerySnapshot workoutsSnapshot =
+        await _firestore
+            .collection('workouts')
+            .where('userId', isEqualTo: userId)
+            .get();
+
+    for (final doc in workoutsSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
   }
 }

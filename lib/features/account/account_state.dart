@@ -13,11 +13,11 @@ class AccountInitial extends AccountState {}
 class AccountLoading extends AccountState {}
 
 class AccountLogin extends AccountState {
-  final String? error;
-  const AccountLogin({this.error});
+  final String? message;
+  const AccountLogin({this.message});
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [message];
 }
 
 class AccountSignUp extends AccountState {
@@ -42,4 +42,4 @@ class AccountError extends AccountState {
 
   @override
   List<Object?> get props => [message];
-} 
+}

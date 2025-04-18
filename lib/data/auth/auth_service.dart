@@ -37,11 +37,15 @@ class AuthService {
   ) async {
     final user = _auth.currentUser;
     if (user == null || !user.isAnonymous) {
-      print('Error: Not signed in as an anonymous user.');
-      throw FirebaseAuthException(
-        code: 'not-anonymous',
-        message: 'User must be signed in anonymously to link.',
-      );
+      if (user != null) {
+        await signUpWithEmailAndPassword(email, password);
+      } else {
+        print('Error: Not signed in as an anonymous user.');
+        throw FirebaseAuthException(
+          code: 'not-anonymous',
+          message: 'User must be signed in anonymously to link.',
+        );
+      }
     }
 
     try {
@@ -86,6 +90,26 @@ class AuthService {
       await signInAnonymously();
     } catch (e) {
       print('Failed to log out or sign back in anonymously: ${e.toString()}');
+    }
+  }
+
+  Future<void> deleteAccount(String password) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      print('Error: No user to delete.');
+      return;
+    }
+
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: user.email!,
+      password: password,
+    );
+    await user.reauthenticateWithCredential(credential);
+    try {
+      await user.delete();
+      print('Account deleted successfully.');
+    } on FirebaseAuthException catch (e) {
+      print('Failed to delete account: ${e.message}');
     }
   }
 }

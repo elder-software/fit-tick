@@ -1,4 +1,5 @@
 import 'package:fit_tick_mobile/data/auth/auth_service.dart';
+import 'package:fit_tick_mobile/data/workout/workout_repo.dart';
 import 'package:fit_tick_mobile/features/account/account_event.dart';
 import 'package:fit_tick_mobile/features/account/account_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,15 +7,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
   final AuthService _authService;
+  final WorkoutRepo _workoutRepo;
 
-  AccountBloc({required AuthService authService})
-    : _authService = authService,
-      super(AccountInitial()) {
+  AccountBloc({
+    required AuthService authService,
+    required WorkoutRepo workoutRepo,
+  }) : _authService = authService,
+       _workoutRepo = workoutRepo,
+       super(AccountInitial()) {
     on<AccountCheckStatus>(_onCheckStatus);
     on<AccountToggleMode>(_onToggleMode);
     on<AccountLoginRequested>(_onLoginRequested);
     on<AccountSignUpRequested>(_onSignUpRequested);
     on<AccountLogOutRequested>(_onLogOutRequested);
+    on<AccountDeleteAccountRequested>(_onDeleteAccountRequested);
 
     _authService.authStateChanges.listen((user) {
       add(AccountCheckStatus());
@@ -55,14 +61,14 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       } else {
         emit(
           const AccountLogin(
-            error: 'Login failed. Please check your credentials.',
+            message: 'Login failed. Please check your credentials.',
           ),
         );
       }
     } on FirebaseAuthException catch (e) {
-      emit(AccountLogin(error: e.message ?? 'An unknown error occurred.'));
+      emit(AccountLogin(message: e.message ?? 'An unknown error occurred.'));
     } catch (e) {
-      emit(AccountLogin(error: e.toString()));
+      emit(AccountLogin(message: e.toString()));
     }
   }
 
@@ -120,6 +126,25 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       if (user != null) {
         emit(AccountLoggedIn(user: user));
       }
+    }
+  }
+
+  Future<void> _onDeleteAccountRequested(
+    AccountDeleteAccountRequested event,
+    Emitter<AccountState> emit,
+  ) async {
+    emit(AccountLoading());
+    final user = _authService.currentUser;
+    if (user == null) {
+      emit(AccountError(message: 'No user found to delete account.'));
+      return;
+    }
+    try {
+      await _workoutRepo.deleteAllWorkoutsForUser(user.uid);
+      await _authService.deleteAccount(event.password);
+      emit(const AccountLogin(message: 'Account deleted successfully.'));
+    } catch (e) {
+      emit(AccountError(message: 'Failed to delete account.'));
     }
   }
 }

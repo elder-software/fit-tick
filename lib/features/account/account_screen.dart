@@ -1,6 +1,7 @@
 import 'package:fit_tick_mobile/features/account/account_bloc.dart';
 import 'package:fit_tick_mobile/features/account/account_event.dart';
 import 'package:fit_tick_mobile/features/account/account_state.dart';
+import 'package:fit_tick_mobile/ui/dialog.dart';
 import 'package:fit_tick_mobile/ui/standard_screen.dart';
 import 'package:fit_tick_mobile/ui/textfield.dart';
 import 'package:flutter/material.dart';
@@ -39,10 +40,10 @@ class _AccountScreenState extends State<AccountScreen> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
-        } else if (state is AccountLogin && state.error != null) {
+        } else if (state is AccountLogin && state.message != null) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text(state.error!)));
+          ).showSnackBar(SnackBar(content: Text(state.message!)));
         } else if (state is AccountSignUp && state.error != null) {
           ScaffoldMessenger.of(
             context,
@@ -72,7 +73,12 @@ class _AccountScreenState extends State<AccountScreen> {
             topBarTitle: topBarTitle,
             pageTitle: 'Login',
             children: [
-              _buildAuthForm(context, bloc, isLogin: true, error: state.error),
+              _buildAuthForm(
+                context,
+                bloc,
+                isLogin: true,
+                error: state.message,
+              ),
             ],
           );
         }
@@ -108,6 +114,7 @@ class _AccountScreenState extends State<AccountScreen> {
     AccountLoggedIn state,
     AccountBloc bloc,
   ) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -125,6 +132,46 @@ class _AccountScreenState extends State<AccountScreen> {
               bloc.add(AccountLogOutRequested());
             },
             child: const Text('Log Out'),
+          ),
+          const SizedBox(height: 20),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder:
+                    (context) => StandardDialog(
+                      title: 'Delete Account',
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Are you sure you want to delete your account? This action is irreversible.',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 24),
+                          FitTickTextField(
+                            controller: _passwordController,
+                            labelText: 'Password',
+                            hintText: 'Password to confirm deletion',
+                            isPassword: true,
+                          ),
+                        ],
+                      ),
+                      onConfirm: () {
+                        bloc.add(
+                          AccountDeleteAccountRequested(
+                            password: _passwordController.text,
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                      },
+                    ),
+              );
+            },
+            child: const Text('Delete Account'),
           ),
         ],
       ),

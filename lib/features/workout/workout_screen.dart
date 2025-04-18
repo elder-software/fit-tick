@@ -1,5 +1,4 @@
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
-import 'package:fit_tick_mobile/data/timer/timer_exercise.dart';
 import 'package:fit_tick_mobile/data/workout/workout.dart';
 import 'package:fit_tick_mobile/features/workout/workout_bloc.dart';
 import 'package:fit_tick_mobile/features/workout/workout_exercise_card.dart';
@@ -57,13 +56,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         String pageTitle;
         Widget bodyContent;
         List<Widget> pageTitleButtons = [];
-        List<Exercise> exercises = [];
         final workoutBloc = context.read<WorkoutBloc>();
 
         if (state is WorkoutLoaded) {
           final workout = state.workout;
           pageTitle = workout.name;
-          exercises = state.exercises;
           pageTitleButtons = [
             StyledIconButton(
               icon: Icons.more_vert,
