@@ -6,13 +6,14 @@ class Counter extends StatefulWidget {
   final int initialValue;
   final ValueChanged<int> onChanged;
   final Color? color;
-
+  final int? minimumValue;
   const Counter({
     super.key,
     this.label = 'Amount',
     this.initialValue = 1,
     required this.onChanged,
     this.color,
+    this.minimumValue = 0,
   });
 
   @override
@@ -48,7 +49,8 @@ class _CounterState extends State<Counter> {
   }
 
   void _updateCount(int newCount) {
-    final clampedCount = newCount < 1 ? 1 : newCount;
+    final clampedCount =
+        newCount < widget.minimumValue! ? widget.minimumValue! : newCount;
     if (_count != clampedCount) {
       setState(() {
         _count = clampedCount;

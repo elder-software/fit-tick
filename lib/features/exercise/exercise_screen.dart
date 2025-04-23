@@ -56,7 +56,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         if (state is ExerciseLoaded && state.exercise != null) {
           _nameController.text = state.exercise!.name;
           _descriptionController.text = state.exercise!.description ?? '';
-          _exerciseTimeController = state.exercise!.exerciseTime ?? 0;
+          _exerciseTimeController = state.exercise!.exerciseTime ?? 5;
           _restTimeController = state.exercise!.restTime ?? 0;
         }
       },
@@ -97,13 +97,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                             children: [
                               Counter(
                                 label: 'Exercise Time (sec)',
-                                initialValue: state.exercise?.exerciseTime ?? 0,
+                                initialValue: state.exercise?.exerciseTime ?? 5,
+                                minimumValue: 5,
                                 onChanged:
                                     (value) => _exerciseTimeController = value,
                               ),
                               Counter(
                                 label: 'Rest Time (sec)',
                                 initialValue: state.exercise?.restTime ?? 0,
+                                minimumValue: 0,
                                 onChanged:
                                     (value) => _restTimeController = value,
                               ),

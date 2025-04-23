@@ -148,18 +148,19 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             onPressed: () {
               if (state is! WorkoutLoaded) return;
 
-              if (state.exercises.isEmpty) {
-                context.read<WorkoutBloc>().add(
-                  const ShowTransientError(message: 'No exercises to start'),
-                );
-                return;
-              }
               final timerExercises = buildTimerExercises(
                 state.exercises,
                 _roundAmount,
                 _roundRest,
               );
-
+              if (timerExercises.isEmpty) {
+                context.read<WorkoutBloc>().add(
+                  const ShowTransientError(
+                    message: 'No exercises exist or total time is 0',
+                  ),
+                );
+                return;
+              }
               Navigator.of(
                 context,
               ).pushNamed('/timer', arguments: {'exercises': timerExercises});
