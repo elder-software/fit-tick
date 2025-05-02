@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fit_tick_mobile/data/exercise/exercise.dart';
+import 'package:fit_tick_mobile/data/utils/lexicographical_indexing.dart';
 
 class ExerciseRepo {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,6 +15,10 @@ class ExerciseRepo {
   }
 
   Future<void> createExercise(String workoutId, Exercise exercise) async {
+    final exercises = await allExercisesForWorkout(workoutId);
+    final String? lastIndex = exercises.isEmpty ? null : exercises.last.index;
+    final newIndex = generateNextIndex(lastIndex);
+    exercise = exercise.copyWith(index: newIndex);
     await _exercisesCollection(workoutId).doc().set(exercise.toJson());
   }
 
@@ -29,7 +34,8 @@ class ExerciseRepo {
   }
 
   Future<List<Exercise>> allExercisesForWorkout(String workoutId) async {
-    final snapshot = await _exercisesCollection(workoutId).get();
+    final snapshot =
+        await _exercisesCollection(workoutId).orderBy('index').get();
     return snapshot.docs.map((doc) => Exercise.fromFirestore(doc)).toList();
   }
 

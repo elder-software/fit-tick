@@ -77,6 +77,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
       final workout = Workout(id: '', userId: userId, name: event.name);
       await _workoutRepo.createWorkout(workout);
+      add(LoadWorkouts());
     } catch (e) {
       emit(HomeError(message: 'Failed to create workout: ${e.toString()}'));
     }

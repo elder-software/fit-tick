@@ -4,6 +4,7 @@ import 'package:fit_tick_mobile/data/timer/timer_exercise.dart';
 class Exercise {
   final String id;
   final String name;
+  final String? index;
   final int? exerciseTime;
   final int? restTime;
   final String? description;
@@ -12,6 +13,7 @@ class Exercise {
   Exercise({
     required this.id,
     required this.name,
+    this.index,
     this.exerciseTime,
     this.restTime,
     this.description,
@@ -26,13 +28,35 @@ class Exercise {
       'restTime': restTime,
       'description': description,
       'imageUrl': imageUrl,
+      'index': index,
     };
+  }
+
+  Exercise copyWith({
+    String? id,
+    String? name,
+    String? index,
+    int? exerciseTime,
+    int? restTime,
+    String? description,
+    String? imageUrl,
+  }) {
+    return Exercise(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      index: index ?? this.index,
+      exerciseTime: exerciseTime ?? this.exerciseTime,
+      restTime: restTime ?? this.restTime,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
   }
 
   factory Exercise.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Exercise(
       id: doc.id,
+      index: data['index'],
       name: data['name'],
       exerciseTime: data['exerciseTime'],
       restTime: data['restTime'],

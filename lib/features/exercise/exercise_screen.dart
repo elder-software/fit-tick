@@ -131,6 +131,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                       exercise: Exercise(
                                         id: state.exercise?.id ?? '',
                                         name: _nameController.text,
+                                        index: state.exercise?.index,
                                         description:
                                             _descriptionController.text,
                                         exerciseTime: _exerciseTimeController,
