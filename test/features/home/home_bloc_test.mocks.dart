@@ -132,6 +132,15 @@ class MockAuthService extends _i1.Mock implements _i4.AuthService {
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteAccount(String? password) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAccount, [password]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 }
 
 /// A class which mocks [WorkoutRepo].
@@ -176,6 +185,19 @@ class MockWorkoutRepo extends _i1.Mock implements _i6.WorkoutRepo {
           as _i5.Stream<List<_i2.Workout>>);
 
   @override
+  _i5.Future<List<_i2.Workout>> allWorkoutsForUserAsList(
+    String? userIdForQuery,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#allWorkoutsForUserAsList, [userIdForQuery]),
+            returnValue: _i5.Future<List<_i2.Workout>>.value(<_i2.Workout>[]),
+            returnValueForMissingStub: _i5.Future<List<_i2.Workout>>.value(
+              <_i2.Workout>[],
+            ),
+          )
+          as _i5.Future<List<_i2.Workout>>);
+
+  @override
   _i5.Future<void> updateWorkout(_i2.Workout? workout) =>
       (super.noSuchMethod(
             Invocation.method(#updateWorkout, [workout]),
@@ -188,6 +210,15 @@ class MockWorkoutRepo extends _i1.Mock implements _i6.WorkoutRepo {
   _i5.Future<void> deleteWorkout(String? workoutId) =>
       (super.noSuchMethod(
             Invocation.method(#deleteWorkout, [workoutId]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteAllWorkoutsForUser(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAllWorkoutsForUser, [userId]),
             returnValue: _i5.Future<void>.value(),
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
