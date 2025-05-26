@@ -165,6 +165,20 @@ class _TimerScreenState extends State<TimerScreen>
           } else if (_isInitialLoad) {
             _isInitialLoad = false;
           }
+
+          // Announce next exercise during rest phases, after current exercise is announced
+          if (!_isInitialLoad && 
+              (state.currentExercise.type == TimerExerciseType.rest || 
+               state.currentExercise.type == TimerExerciseType.roundRest)) {
+            final nextIndex = state.currentExerciseIndex + 1;
+            if (nextIndex < state.exercises.length) {
+              final nextExercise = state.exercises[nextIndex];
+              // Delay to let current exercise announcement finish first
+              Timer(const Duration(seconds: 2), () {
+                _ttsService.speak("Next: ${nextExercise.name}");
+              });
+            }
+          }
         }
       },
       child: BlocBuilder<TimerBloc, TimerState>(
